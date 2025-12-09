@@ -17,11 +17,9 @@
                   <div>
                         <h6 class="text-sm text-gray-400 font-semibold mb-4">GENERAL</h6>
                         <ul class="flex flex-col gap-y-7">
-                              <li><a href="#" class="flex gap-x-2 font-semibold text-base text-violet-700">My Overview</a></li>
-                              <li><a href="" class="flex gap-x-2 font-semibold text-base">User</a></li>
-                              <li><a href="" class="flex gap-x-2 font-semibold text-base">User</a></li>
-                              <li><a href="" class="flex gap-x-2 font-semibold text-base">User</a></li>
-                              <li><a href="" class="flex gap-x-2 font-semibold text-base">Report Damages</a></li>
+                              <li><a href="{{ route('user.dashboard') }}" class="flex gap-x-2 font-semibold text-base {{ request()->routeIs('user.dashboard') ? 'text-violet-700' : '' }}">My Overview</a></li>
+                              <li><a href="{{ route('user.requests') }}" class="flex gap-x-2 font-semibold text-base {{ request()->routeIs('user.requests') ? 'text-violet-700' : '' }}">Pengajuan Saya</a></li>
+                              <li><a href="{{ route('reportdamages.create') }}" class="flex gap-x-2 font-semibold text-base {{ request()->routeIs('reportdamages.create', 'reportdamages.index', 'reportdamages.*') ? 'text-violet-700' : '' }}">Report Damages</a></li>
                               <li><a href="{{ route('home') }}" class="flex gap-x-2 font-semibold text-base">Home</a></li>
                         </ul>
                   </div>
