@@ -57,6 +57,9 @@ class BorrowingController extends Controller
             'admin_id' => $request->admin_id,
         ]);
 
+        // Update asset status to 'dipinjam' since it's now approved for borrowing
+        $borrowing->asset->update(['status' => 'dipinjam']);
+
         // Reject all conflicting borrowing requests
         foreach ($conflictingBorrowings as $conflictingBorrowing) {
             $conflictingBorrowing->update([
@@ -73,10 +76,10 @@ class BorrowingController extends Controller
 
         if ($conflictingBorrowings->count() > 0) {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Peminjaman berhasil disetujui. ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
+                             ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam". ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
         } else {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Peminjaman berhasil disetujui.');
+                             ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam".');
         }
     }
 

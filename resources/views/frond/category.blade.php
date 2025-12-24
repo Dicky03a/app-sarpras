@@ -11,7 +11,8 @@
 </head>
 
 <body>
-      
+      @include('layouts.navbar')
+
       <section id="Cities" class="flex flex-col gap-8 mt-24">
             <div class="w-full max-w-[1130px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                   <h2 class="font-bold text-3xl md:text-4xl leading-tight text-center md:text-left">
