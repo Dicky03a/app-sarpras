@@ -301,4 +301,91 @@ class BorrowingController extends Controller
 
         return redirect()->route('user.dashboard')->with('success', 'Permintaan peminjaman berhasil diajukan.');
     }
+
+    /**
+     * Show the form for creating a new borrowing directly (admin only).
+     */
+    public function createDirect()
+    {
+        $assets = Asset::all();
+
+        return view('borrowings.create-direct', compact('assets'));
+    }
+
+    /**
+     * Store a newly created borrowing directly (admin only).
+     */
+    public function storeDirect(Request $request)
+    {
+        $request->validate([
+            'asset_id' => 'required|exists:assets,id',
+            'tanggal_mulai' => 'required|date|after_or_equal:today',
+            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'keperluan' => 'required|string|max:500',
+            'status' => 'required|in:pending,disetujui,dipinjam,selesai,ditolak',
+            'lampiran_bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120', // 5MB max
+        ]);
+
+        // Check if asset is available (unless admin is creating a 'dipinjam' status)
+        $asset = Asset::find($request->asset_id);
+        if ($request->status !== 'dipinjam' && $asset->status !== 'tersedia') {
+            if ($asset->status === 'dipinjam') {
+                // Check for active borrowing requests that overlap with the planned borrowing period
+                $activeBorrowing = Borrowing::where('asset_id', $asset->id)
+                                          ->where('status', 'dipinjam')
+                                          ->first();
+
+                if ($activeBorrowing) {
+                    return redirect()->back()->with('error', 'Aset ini sedang dipinjam oleh user lain sampai tanggal ' .
+                           \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
+                           '. Silakan pilih tanggal lain atau aset lain.');
+                }
+            }
+
+            return redirect()->back()->with('error', 'Aset saat ini tidak tersedia untuk dipinjam.');
+        }
+
+        // Check if asset isn't already borrowed during the requested period
+        $existingBorrowing = Borrowing::where('asset_id', $request->asset_id)
+                                    ->where('status', 'dipinjam')  // Only check for active borrowings
+                                    ->where(function ($query) use ($request) {
+                                        $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                                              ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                                              ->orWhere(function ($q) use ($request) {
+                                                  $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
+                                                    ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
+                                              });
+                                    })
+                                    ->first();
+
+        if ($existingBorrowing) {
+            return redirect()->back()->with('error', 'Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal ' .
+                   \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
+                   '. Silakan pilih tanggal lain atau aset lain.');
+        }
+
+        // Handle file upload if provided
+        $lampiranPath = null;
+        if ($request->hasFile('lampiran_bukti')) {
+            $lampiranPath = $request->file('lampiran_bukti')->store('borrowing_documents', 'public');
+        }
+
+        $borrowing = Borrowing::create([
+            'user_id' => auth()->id(), // The logged-in admin becomes the user
+            'asset_id' => $request->asset_id,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'keperluan' => $request->keperluan,
+            'lampiran_bukti' => $lampiranPath,
+            'status' => $request->status,
+            'admin_id' => auth()->id(), // Admin who created this direct borrowing
+        ]);
+
+        // Update asset status if the borrowing is marked as 'dipinjam'
+        if ($request->status === 'dipinjam') {
+            $asset->update(['status' => 'dipinjam']);
+        }
+
+        return redirect()->route('borrowings.index')->with('success', 'Peminjaman berhasil dibuat secara langsung.');
+    }
 }

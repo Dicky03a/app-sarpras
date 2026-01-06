@@ -4,6 +4,9 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Pengajuan Saya</h1>
+        <a href="{{ route('asset.front') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Ajukan Peminjaman Baru
+        </a>
     </div>
 
     @if(session('success'))
@@ -16,6 +19,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak ada pengajuan</h3>
             <p class="text-gray-500 dark:text-gray-400">Anda belum membuat pengajuan peminjaman aset.</p>
+            <div class="mt-4">
+                <a href="{{ route('asset.front') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Ajukan Peminjaman Baru
+                </a>
+            </div>
         </div>
     @else
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -48,12 +56,12 @@
                                 <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate" title="{{ $request->keperluan }}">{{ $request->keperluan }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    @if($request->status == 'pending') bg-yellow-100 text-yellow-800 
-                                    @elseif($request->status == 'disetujui') bg-green-100 text-green-800 
-                                    @elseif($request->status == 'ditolak') bg-red-100 text-red-800 
-                                    @elseif($request->status == 'dipinjam') bg-blue-100 text-blue-800 
-                                    @elseif($request->status == 'selesai') bg-gray-100 text-gray-800 
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    @if($request->status == 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($request->status == 'disetujui') bg-green-100 text-green-800
+                                    @elseif($request->status == 'ditolak') bg-red-100 text-red-800
+                                    @elseif($request->status == 'dipinjam') bg-blue-100 text-blue-800
+                                    @elseif($request->status == 'selesai') bg-gray-100 text-gray-800
                                     @endif">
                                     @if($request->status == 'pending') Menunggu Persetujuan
                                     @elseif($request->status == 'disetujui') Disetujui

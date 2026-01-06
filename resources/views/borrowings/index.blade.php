@@ -2,8 +2,16 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
         <h1 class="text-2xl font-bold text-gray-800">Borrowing Requests</h1>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('borrowings.create.direct') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Create Direct Borrowing
+            </a>
+            <a href="{{ route('asset.front') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Browse Assets to Borrow
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -61,7 +69,7 @@
                         {{ $borrowing->keperluan }}
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-900">
-                        <span class="px-2 py-1 rounded-full text-xs 
+                        <span class="px-2 py-1 rounded-full text-xs
                             @if($borrowing->status == 'pending') bg-yellow-100 text-yellow-800
                             @elseif($borrowing->status == 'disetujui') bg-green-100 text-green-800
                             @elseif($borrowing->status == 'ditolak') bg-red-100 text-red-800
@@ -76,7 +84,7 @@
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-900">
                         <a href="{{ route('borrowings.show', $borrowing->id) }}" class="text-blue-600 hover:text-blue-900 mr-2">View</a>
-                        
+
                         @if($borrowing->status == 'pending')
                             <form action="{{ route('borrowings.approve', $borrowing->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Approve this borrowing request?');">
                                 @csrf
@@ -84,7 +92,7 @@
                                 <input type="hidden" name="admin_id" value="{{ auth()->id() }}">
                                 <button type="submit" class="text-green-600 hover:text-green-900 mr-2">Approve</button>
                             </form>
-                            <a href="#" class="text-red-600 hover:text-red-900 modal-trigger" 
+                            <a href="#" class="text-red-600 hover:text-red-900 modal-trigger"
                                data-id="{{ $borrowing->id }}"
                                data-name="{{ $borrowing->user->name ?? 'N/A' }}"
                                data-asset="{{ $borrowing->asset->name ?? 'N/A' }}">Reject</a>
@@ -129,29 +137,29 @@
                     </svg>
                 </button>
             </div>
-            
+
             <form id="rejectForm" method="POST">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="admin_id" value="{{ auth()->id() }}">
-                
+
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2">User:</label>
                     <p class="text-gray-900 font-semibold" id="modalUserName"></p>
                 </div>
-                
+
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2">Asset:</label>
                     <p class="text-gray-900 font-semibold" id="modalAssetName"></p>
                 </div>
-                
+
                 <div class="mb-4">
                     <label for="alasan" class="block text-gray-700 mb-2">Reason for Rejection:</label>
-                    <textarea name="alasan" id="alasan" 
+                    <textarea name="alasan" id="alasan"
                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                               rows="3" required></textarea>
                 </div>
-                
+
                 <div class="flex justify-end space-x-3">
                     <button type="button" class="close-modal bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                         Cancel
@@ -171,28 +179,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalTriggers = document.querySelectorAll('.modal-trigger');
     const closeModalBtns = document.querySelectorAll('.close-modal');
     const rejectForm = document.getElementById('rejectForm');
-    
+
     modalTriggers.forEach(trigger => {
         trigger.addEventListener('click', function(e) {
             e.preventDefault();
             const borrowingId = this.getAttribute('data-id');
             const userName = this.getAttribute('data-name');
             const assetName = this.getAttribute('data-asset');
-            
+
             document.getElementById('modalUserName').textContent = userName;
             document.getElementById('modalAssetName').textContent = assetName;
             rejectForm.action = '/borrowings/' + borrowingId + '/reject';
-            
+
             modal.classList.remove('hidden');
         });
     });
-    
+
     closeModalBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             modal.classList.add('hidden');
         });
     });
-    
+
     window.addEventListener('click', function(event) {
         if (event.target === modal) {
             modal.classList.add('hidden');
