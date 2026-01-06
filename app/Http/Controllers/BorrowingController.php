@@ -212,10 +212,10 @@ class BorrowingController extends Controller
             return redirect()->back()->with('error', 'Aset saat ini tidak tersedia untuk dipinjam.');
         }
 
-        // Only check for approved or borrowed conflicts, not pending ones
-        // User should be able to create a request even if there's another pending request
+        // Only check for borrowed conflicts (active usage), not pending or approved ones
+        // User should be able to create a request even if there's another pending or approved request
         $conflictingBorrowings = Borrowing::where('asset_id', $asset->id)
-                                        ->whereIn('status', ['disetujui', 'dipinjam'])
+                                        ->where('status', 'dipinjam')  // Only check for active borrowings
                                         ->get();
 
         if ($conflictingBorrowings->count() > 0) {
@@ -266,8 +266,9 @@ class BorrowingController extends Controller
         }
 
         // Check if asset isn't already borrowed during the requested period
+        // Only check for 'dipinjam' status (active borrowing), not pending or approved requests
         $existingBorrowing = Borrowing::where('asset_id', $request->asset_id)
-                                    ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+                                    ->where('status', 'dipinjam')  // Only check for active borrowings
                                     ->where(function ($query) use ($request) {
                                         $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
                                               ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
@@ -279,15 +280,10 @@ class BorrowingController extends Controller
                                     ->first();
 
         if ($existingBorrowing) {
-            // Check if it's an active borrowing
-            if (in_array($existingBorrowing->status, ['dipinjam'])) {
-                return redirect()->back()->with('error', 'Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal ' .
-                       \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
-                       '. Silakan pilih tanggal lain atau aset lain.');
-            } else {
-                // It's a pending or approved borrowing
-                return redirect()->back()->with('error', 'Aset sudah dipesan untuk dipinjam pada periode yang diminta. Silakan pilih tanggal lain atau aset lain.');
-            }
+            // Only reject if the asset is actually in use (dipinjam status)
+            return redirect()->back()->with('error', 'Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal ' .
+                   \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
+                   '. Silakan pilih tanggal lain atau aset lain.');
         }
 
         // Handle file upload
