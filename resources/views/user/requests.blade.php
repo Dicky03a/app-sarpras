@@ -75,7 +75,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <a href="{{ route('borrowings.show', $request->id) }}" class="text-blue-600 hover:text-blue-900">Lihat Detail</a>
+                                <a href="{{ route('user.borrowings.show', $request->id) }}" class="text-blue-600 hover:text-blue-900">Lihat Detail</a>
                             </td>
                         </tr>
                         @endforeach

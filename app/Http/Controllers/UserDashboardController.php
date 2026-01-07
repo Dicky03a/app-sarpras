@@ -28,4 +28,30 @@ class UserDashboardController extends Controller
 
         return view('user.requests', compact('borrowingRequests'));
     }
+
+    /**
+     * Display detailed information for a specific borrowing request made by the user.
+     */
+    public function showBorrowing(Borrowing $borrowing)
+    {
+        $user = Auth::user();
+
+        // Ensure the user can only view their own borrowing requests
+        if ($borrowing->user_id !== $user->id) {
+            abort(403, 'Unauthorized to view this borrowing request.');
+        }
+
+        // Load all related data for the borrowing
+        $borrowing->load([
+            'asset',
+            'rejection',
+            'admin',
+            'moves',
+            'moves.oldAsset',
+            'moves.newAsset',
+            'moves.admin'
+        ]);
+
+        return view('user.borrowing-detail', compact('borrowing'));
+    }
 }
