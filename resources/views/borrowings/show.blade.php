@@ -107,6 +107,37 @@
                     </div>
                 @endif
 
+                <!-- Move History Section -->
+                @if($borrowing->moves->count() > 0)
+                    <div class="mb-4 md:col-span-2 bg-yellow-50 p-4 rounded border border-yellow-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Riwayat Pemindahan Tempat</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pemindahan</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempat Lama</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempat Baru</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alasan</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($borrowing->moves as $move)
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $move->moved_at->format('d F Y H:i') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $move->oldAsset->name }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $move->newAsset->name }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-900">{{ $move->alasan_pemindahan }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $move->admin->name }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2 font-semibold">Admin</label>
                     <p class="text-gray-900">{{ $borrowing->admin->name ?? '-' }}</p>
@@ -129,8 +160,8 @@
                             Approve Request
                         </button>
                     </form>
-                    
-                    <a href="#" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded modal-trigger" 
+
+                    <a href="#" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded modal-trigger"
                        data-id="{{ $borrowing->id }}"
                        data-name="{{ $borrowing->user->name ?? 'N/A' }}"
                        data-asset="{{ $borrowing->asset->name ?? 'N/A' }}">Reject Request</a>
@@ -144,6 +175,12 @@
                             Mark as Borrowed
                         </button>
                     </form>
+
+                    <!-- Add Move Place Button for approved borrowings -->
+                    <a href="{{ route('borrowings.move.form', $borrowing->id) }}"
+                       class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                        Pindahkan Tempat
+                    </a>
                 @elseif($borrowing->status == 'dipinjam')
                     <form action="{{ route('borrowings.markAsReturned', $borrowing->id) }}" method="POST" onsubmit="return confirm('Mark this borrowing as returned?');">
                         @csrf

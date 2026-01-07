@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Borrowing extends Model
@@ -59,5 +60,13 @@ class Borrowing extends Model
     public function rejection(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(BorrowingRejection::class, 'borrowing_id');
+    }
+
+    /**
+     * Get the move records for this borrowing (if any).
+     */
+    public function moves(): HasMany
+    {
+        return $this->hasMany(BorrowingMove::class, 'borrowing_id');
     }
 }

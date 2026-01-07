@@ -68,6 +68,8 @@ Route::middleware('auth')->group(function () {
         // Borrowing administration routes
         Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
         Route::get('/borrowings/{borrowing}', [BorrowingController::class, 'show'])->name('borrowings.show');
+        Route::get('/borrowings/{borrowing}/move', [BorrowingController::class, 'showMoveForm'])->name('borrowings.move.form');
+        Route::put('/borrowings/{borrowing}/move', [BorrowingController::class, 'move'])->name('borrowings.move');
         Route::get('/borrowings/direct/create', [BorrowingController::class, 'createDirect'])->name('borrowings.create.direct');
         Route::post('/borrowings/direct', [BorrowingController::class, 'storeDirect'])->name('borrowings.store.direct');
         Route::put('/borrowings/{borrowing}/approve', [BorrowingController::class, 'approve'])->name('borrowings.approve');

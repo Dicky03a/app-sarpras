@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Borrowing;
 use App\Models\BorrowingRejection;
 use App\Models\Asset;
+use App\Models\BorrowingMove;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -24,7 +25,7 @@ class BorrowingController extends Controller
      */
     public function show(Borrowing $borrowing)
     {
-        $borrowing->load(['user', 'asset', 'admin', 'rejection']);
+        $borrowing->load(['user', 'asset', 'admin', 'rejection', 'moves', 'moves.oldAsset', 'moves.newAsset', 'moves.admin']);
         return view('borrowings.show', compact('borrowing'));
     }
 
@@ -39,17 +40,17 @@ class BorrowingController extends Controller
 
         // Check for conflicting borrowing requests for the same asset during the same period
         $conflictingBorrowings = Borrowing::where('asset_id', $borrowing->asset_id)
-                                        ->where('id', '!=', $borrowing->id)
-                                        ->whereIn('status', ['pending', 'disetujui'])
-                                        ->where(function ($query) use ($borrowing) {
-                                            $query->whereBetween('tanggal_mulai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
-                                                  ->orWhereBetween('tanggal_selesai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
-                                                  ->orWhere(function ($q) use ($borrowing) {
-                                                      $q->where('tanggal_mulai', '<=', $borrowing->tanggal_mulai)
-                                                        ->where('tanggal_selesai', '>=', $borrowing->tanggal_selesai);
-                                                  });
-                                        })
-                                        ->get();
+            ->where('id', '!=', $borrowing->id)
+            ->whereIn('status', ['pending', 'disetujui'])
+            ->where(function ($query) use ($borrowing) {
+                $query->whereBetween('tanggal_mulai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhere(function ($q) use ($borrowing) {
+                        $q->where('tanggal_mulai', '<=', $borrowing->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $borrowing->tanggal_selesai);
+                    });
+            })
+            ->get();
 
         // Update the borrowing to approved status
         $borrowing->update([
@@ -76,10 +77,10 @@ class BorrowingController extends Controller
 
         if ($conflictingBorrowings->count() > 0) {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam". ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
+                ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam". ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
         } else {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam".');
+                ->with('success', 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam".');
         }
     }
 
@@ -106,7 +107,7 @@ class BorrowingController extends Controller
         ]);
 
         return redirect()->route('borrowings.index')
-                         ->with('success', 'Peminjaman berhasil ditolak.');
+            ->with('success', 'Peminjaman berhasil ditolak.');
     }
 
     /**
@@ -120,17 +121,17 @@ class BorrowingController extends Controller
 
         // Check for conflicting borrowing requests for the same asset during the same period
         $conflictingBorrowings = Borrowing::where('asset_id', $borrowing->asset_id)
-                                        ->where('id', '!=', $borrowing->id)
-                                        ->whereIn('status', ['pending', 'disetujui'])
-                                        ->where(function ($query) use ($borrowing) {
-                                            $query->whereBetween('tanggal_mulai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
-                                                  ->orWhereBetween('tanggal_selesai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
-                                                  ->orWhere(function ($q) use ($borrowing) {
-                                                      $q->where('tanggal_mulai', '<=', $borrowing->tanggal_mulai)
-                                                        ->where('tanggal_selesai', '>=', $borrowing->tanggal_selesai);
-                                                  });
-                                        })
-                                        ->get();
+            ->where('id', '!=', $borrowing->id)
+            ->whereIn('status', ['pending', 'disetujui'])
+            ->where(function ($query) use ($borrowing) {
+                $query->whereBetween('tanggal_mulai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhere(function ($q) use ($borrowing) {
+                        $q->where('tanggal_mulai', '<=', $borrowing->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $borrowing->tanggal_selesai);
+                    });
+            })
+            ->get();
 
         // Update asset status to 'dipinjam'
         $borrowing->asset->update(['status' => 'dipinjam']);
@@ -156,10 +157,10 @@ class BorrowingController extends Controller
 
         if ($conflictingBorrowings->count() > 0) {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Status peminjaman diperbarui menjadi sedang dipinjam. ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
+                ->with('success', 'Status peminjaman diperbarui menjadi sedang dipinjam. ' . $conflictingBorrowings->count() . ' peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.');
         } else {
             return redirect()->route('borrowings.index')
-                             ->with('success', 'Status peminjaman diperbarui menjadi sedang dipinjam.');
+                ->with('success', 'Status peminjaman diperbarui menjadi sedang dipinjam.');
         }
     }
 
@@ -181,7 +182,7 @@ class BorrowingController extends Controller
         ]);
 
         return redirect()->route('borrowings.index')
-                         ->with('success', 'Peminjaman berhasil diselesaikan.');
+            ->with('success', 'Peminjaman berhasil diselesaikan.');
     }
 
     /**
@@ -199,13 +200,13 @@ class BorrowingController extends Controller
             if ($asset->status === 'dipinjam') {
                 // Check for active borrowing requests that overlap with the planned borrowing period
                 $activeBorrowing = Borrowing::where('asset_id', $asset->id)
-                                          ->where('status', 'dipinjam')
-                                          ->first();
+                    ->where('status', 'dipinjam')
+                    ->first();
 
                 if ($activeBorrowing) {
                     return redirect()->back()->with('error', 'Aset ini sedang dipinjam oleh user lain sampai tanggal ' .
-                           \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
-                           '. Silakan pilih tanggal lain atau aset lain.');
+                        \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
+                        '. Silakan pilih tanggal lain atau aset lain.');
                 }
             }
 
@@ -215,19 +216,19 @@ class BorrowingController extends Controller
         // Only check for borrowed conflicts (active usage), not pending or approved ones
         // User should be able to create a request even if there's another pending or approved request
         $conflictingBorrowings = Borrowing::where('asset_id', $asset->id)
-                                        ->where('status', 'dipinjam')  // Only check for active borrowings
-                                        ->get();
+            ->where('status', 'dipinjam')  // Only check for active borrowings
+            ->get();
 
         if ($conflictingBorrowings->count() > 0) {
             $conflictDates = [];
             foreach ($conflictingBorrowings as $conflicting) {
                 $conflictDates[] = \Carbon\Carbon::parse($conflicting->tanggal_mulai)->format('d F Y') .
-                                 ' - ' . \Carbon\Carbon::parse($conflicting->tanggal_selesai)->format('d F Y');
+                    ' - ' . \Carbon\Carbon::parse($conflicting->tanggal_selesai)->format('d F Y');
             }
 
             $conflictDateString = implode(', ', $conflictDates);
             return redirect()->back()->with('error', 'Aset ini sudah dipesan untuk dipinjam oleh user lain pada rentang tanggal: ' .
-                   $conflictDateString . '. Silakan pilih tanggal lain atau aset lain.');
+                $conflictDateString . '. Silakan pilih tanggal lain atau aset lain.');
         }
 
         return view('borrowings.create', compact('asset'));
@@ -252,13 +253,13 @@ class BorrowingController extends Controller
             if ($asset->status === 'dipinjam') {
                 // Check for active borrowing requests that overlap with the planned borrowing period
                 $activeBorrowing = Borrowing::where('asset_id', $asset->id)
-                                          ->where('status', 'dipinjam')
-                                          ->first();
+                    ->where('status', 'dipinjam')
+                    ->first();
 
                 if ($activeBorrowing) {
                     return redirect()->back()->with('error', 'Aset ini sedang dipinjam oleh user lain sampai tanggal ' .
-                           \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
-                           '. Silakan pilih tanggal lain atau aset lain.');
+                        \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
+                        '. Silakan pilih tanggal lain atau aset lain.');
                 }
             }
 
@@ -268,22 +269,22 @@ class BorrowingController extends Controller
         // Check if asset isn't already borrowed during the requested period
         // Only check for 'dipinjam' status (active borrowing), not pending or approved requests
         $existingBorrowing = Borrowing::where('asset_id', $request->asset_id)
-                                    ->where('status', 'dipinjam')  // Only check for active borrowings
-                                    ->where(function ($query) use ($request) {
-                                        $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
-                                              ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
-                                              ->orWhere(function ($q) use ($request) {
-                                                  $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
-                                                    ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
-                                              });
-                                    })
-                                    ->first();
+            ->where('status', 'dipinjam')  // Only check for active borrowings
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
+                    });
+            })
+            ->first();
 
         if ($existingBorrowing) {
             // Only reject if the asset is actually in use (dipinjam status)
             return redirect()->back()->with('error', 'Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal ' .
-                   \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
-                   '. Silakan pilih tanggal lain atau aset lain.');
+                \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
+                '. Silakan pilih tanggal lain atau aset lain.');
         }
 
         // Handle file upload
@@ -332,13 +333,13 @@ class BorrowingController extends Controller
             if ($asset->status === 'dipinjam') {
                 // Check for active borrowing requests that overlap with the planned borrowing period
                 $activeBorrowing = Borrowing::where('asset_id', $asset->id)
-                                          ->where('status', 'dipinjam')
-                                          ->first();
+                    ->where('status', 'dipinjam')
+                    ->first();
 
                 if ($activeBorrowing) {
                     return redirect()->back()->with('error', 'Aset ini sedang dipinjam oleh user lain sampai tanggal ' .
-                           \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
-                           '. Silakan pilih tanggal lain atau aset lain.');
+                        \Carbon\Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y') .
+                        '. Silakan pilih tanggal lain atau aset lain.');
                 }
             }
 
@@ -347,21 +348,21 @@ class BorrowingController extends Controller
 
         // Check if asset isn't already borrowed during the requested period
         $existingBorrowing = Borrowing::where('asset_id', $request->asset_id)
-                                    ->where('status', 'dipinjam')  // Only check for active borrowings
-                                    ->where(function ($query) use ($request) {
-                                        $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
-                                              ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
-                                              ->orWhere(function ($q) use ($request) {
-                                                  $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
-                                                    ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
-                                              });
-                                    })
-                                    ->first();
+            ->where('status', 'dipinjam')  // Only check for active borrowings
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
+                    });
+            })
+            ->first();
 
         if ($existingBorrowing) {
             return redirect()->back()->with('error', 'Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal ' .
-                   \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
-                   '. Silakan pilih tanggal lain atau aset lain.');
+                \Carbon\Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y') .
+                '. Silakan pilih tanggal lain atau aset lain.');
         }
 
         // Handle file upload if provided
@@ -387,5 +388,110 @@ class BorrowingController extends Controller
         }
 
         return redirect()->route('borrowings.index')->with('success', 'Peminjaman berhasil dibuat secara langsung.');
+    }
+
+    /**
+     * Show the form for moving a borrowing to a different place.
+     */
+    public function showMoveForm(Borrowing $borrowing)
+    {
+        // Check if borrowing status is 'disetujui'
+        if ($borrowing->status !== 'disetujui') {
+            return redirect()->route('borrowings.index')
+                ->with('error', 'Hanya peminjaman dengan status "disetujui" yang dapat dipindahkan.');
+        }
+
+        // Get all available assets (excluding the current one)
+        $availableAssets = Asset::where('id', '!=', $borrowing->asset_id)
+            ->where('status', 'tersedia')
+            ->get();
+
+        return view('borrowings.move', compact('borrowing', 'availableAssets'));
+    }
+
+    /**
+     * Move a borrowing to a different place.
+     */
+    public function move(Request $request, Borrowing $borrowing)
+    {
+        $request->validate([
+            'new_asset_id' => 'required|exists:assets,id',
+            'alasan_pemindahan' => 'required|string|max:500',
+        ]);
+
+        // Check if borrowing status is 'disetujui'
+        if ($borrowing->status !== 'disetujui') {
+            return redirect()->route('borrowings.index')
+                ->with('error', 'Hanya peminjaman dengan status "disetujui" yang dapat dipindahkan.');
+        }
+
+        // Get the new asset
+        $newAsset = Asset::find($request->new_asset_id);
+
+        // Check if new asset is available
+        if ($newAsset->status !== 'tersedia') {
+            return redirect()->back()->with('error', 'Tempat baru tidak tersedia untuk dipinjam.');
+        }
+
+        // Check for conflicting borrowing requests for the new asset during the same period
+        $conflictingBorrowings = Borrowing::where('asset_id', $request->new_asset_id)
+            ->where('id', '!=', $borrowing->id)
+            ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+            ->where(function ($query) use ($borrowing) {
+                $query->whereBetween('tanggal_mulai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$borrowing->tanggal_mulai, $borrowing->tanggal_selesai])
+                    ->orWhere(function ($q) use ($borrowing) {
+                        $q->where('tanggal_mulai', '<=', $borrowing->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $borrowing->tanggal_selesai);
+                    });
+            })
+            ->get();
+
+        if ($conflictingBorrowings->count() > 0) {
+            return redirect()->back()->with('error', 'Tempat baru sudah dipesan untuk dipinjam oleh user lain pada rentang tanggal yang sama.');
+        }
+
+        // Start transaction to ensure data consistency
+        \DB::beginTransaction();
+
+        try {
+            // Create a record in borrowing_moves table to track the move
+            $borrowingMove = BorrowingMove::create([
+                'borrowing_id' => $borrowing->id,
+                'old_asset_id' => $borrowing->asset_id,
+                'new_asset_id' => $request->new_asset_id,
+                'alasan_pemindahan' => $request->alasan_pemindahan,
+                'admin_id' => auth()->id(),
+            ]);
+
+            // Update the borrowing record with the new asset
+            $borrowing->update([
+                'asset_id' => $request->new_asset_id,
+            ]);
+
+            // Update asset status: old asset becomes available, new asset becomes borrowed
+            $borrowing->asset->update(['status' => 'tersedia']); // old asset
+            $newAsset->update(['status' => 'dipinjam']); // new asset
+
+            \DB::commit();
+
+            // Send notification to user about the move
+            $this->sendMoveNotification($borrowing, $borrowingMove);
+
+            return redirect()->route('borrowings.show', $borrowing->id)
+                ->with('success', 'Peminjaman berhasil dipindahkan ke tempat baru.');
+        } catch (\Exception $e) {
+            \DB::rollback();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memindahkan peminjaman. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Send notification to user about the move.
+     */
+    private function sendMoveNotification(Borrowing $borrowing, BorrowingMove $borrowingMove)
+    {
+        // Send database notification to the user
+        $borrowing->user->notify(new \App\Notifications\BorrowingMoveNotification($borrowingMove));
     }
 }
