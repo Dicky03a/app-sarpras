@@ -18,17 +18,18 @@
 
 <body>
 
-    <div class="min-h-screen flex justify-center items-center p-6">
+    <div class="bg-gray-50">
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 max-w-5xl w-full mx-auto gap-x-10 items-center">
+        <div class="min-h-screen flex items-center justify-center px-4">
 
             {{-- CARD LOGIN --}}
-            <div class="bg-white p-10 rounded-2xl shadow-md">
+            <div class="w-full max-w-md bg-white p-10 rounded-2xl shadow-md">
+
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
                     <div class="flex flex-col gap-y-7">
-                        <h3 class="xl:text-4xl md:text-3xl text-2xl text-indigo-950 font-bold">
+                        <h3 class="xl:text-4xl md:text-3xl text-2xl text-indigo-950 font-bold text-center">
                             Sign In to Your Account
                         </h3>
 
@@ -38,20 +39,20 @@
                             <input type="email" name="email" value="{{ old('email') }}"
                                 class="w-full py-3 rounded-full pl-5 pr-10 border border-gray-300 text-indigo-950 font-semibold"
                                 required autofocus>
-
                             @error('email')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         {{-- PASSWORD --}}
-                        <div class="flex flex-col">
+                        <div>
                             <p class="font-semibold text-indigo-950 text-base mb-2">Password</p>
                             <input type="password" name="password"
                                 class="w-full py-3 rounded-full pl-5 pr-10 border border-gray-300 text-indigo-950 font-semibold"
                                 required>
 
-                            <a href="{{ route('password.request') }}" class="text-sm text-blue-700 text-right mt-1">
+                            <a href="{{ route('password.request') }}"
+                                class="text-sm text-blue-700 text-right mt-1 block">
                                 Forgot Password?
                             </a>
 
@@ -62,10 +63,11 @@
 
                         {{-- SUBMIT --}}
                         <button type="submit"
-                            class="w-full text-center px-7 rounded-full text-base py-3 font-semibold text-white bg-violet-700">
+                            class="w-full rounded-full py-3 font-semibold text-white bg-violet-700">
                             Log In
                         </button>
-                        <p class="text-sm text-center text-gray-600 mt-4">
+
+                        <p class="text-sm text-center text-gray-600">
                             Don't have an account?
                             <a href="{{ route('register') }}" class="text-blue-700 font-semibold">
                                 Sign Up
@@ -73,16 +75,12 @@
                         </p>
                     </div>
                 </form>
-            </div>
 
-            {{-- IMAGE --}}
-            <div class="hidden lg:block">
-                <img src="{{ asset('images/hero_illustration.png') }}" alt="Login Illustration">
             </div>
-
         </div>
 
     </div>
+
 
 
     <script>
