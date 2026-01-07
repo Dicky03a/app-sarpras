@@ -56,4 +56,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Borrowing::class, 'user_id');
     }
+
+    /**
+     * Get the damage reports made by the user.
+     */
+    public function reportDamages(): HasMany
+    {
+        return $this->hasMany(ReportDamage::class, 'user_id');
+    }
 }

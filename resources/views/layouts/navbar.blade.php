@@ -11,7 +11,7 @@
             <li><a href="{{ route('home') }}" class="hover:text-blue-600">Home</a></li>
             <li><a href="{{ route('asset.front') }}" class="hover:text-blue-600">Aset</a></li>
             <li><a href="{{ route('category.front') }}" class="hover:text-blue-600">Categories</a></li>
-            <li><a href="#" class="hover:text-blue-600">Lapor</a></li>
+            <li><a href="{{ route('public.report.damage.form') }}" class="hover:text-blue-600">Lapor</a></li>
         </ul>
 
         <!-- Desktop Auth Button -->

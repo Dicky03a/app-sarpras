@@ -56,7 +56,7 @@
                         <label for="tanggal_lapor" class="block text-gray-700 mb-2">Report Date</label>
                         <input type="datetime-local" name="tanggal_lapor" id="tanggal_lapor"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                               value="{{ old('tanggal_lapor', $reportDamage->tanggal_lapor?->format('Y-m-d\TH:i')) }}" required>
+                               value="{{ old('tanggal_lapor', $reportDamage->tanggal_lapor ? $reportDamage->tanggal_lapor->format('Y-m-d\TH:i') : '') }}" required>
                         @error('tanggal_lapor')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

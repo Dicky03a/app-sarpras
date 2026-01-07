@@ -22,6 +22,16 @@ class Asset extends Model
         'slug',
     ];
 
+    // Define the possible conditions for assets
+    const CONDITION_BAIK = 'baik';
+    const CONDITION_RUSAK_RINGAN = 'rusak_ringan';
+    const CONDITION_RUSAK_BERAT = 'rusak_berat';
+    const CONDITION_CHOICES = [
+        self::CONDITION_BAIK => 'Baik',
+        self::CONDITION_RUSAK_RINGAN => 'Rusak Ringan',
+        self::CONDITION_RUSAK_BERAT => 'Rusak Berat',
+    ];
+
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

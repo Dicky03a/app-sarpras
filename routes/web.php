@@ -5,6 +5,7 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicDamageReportController;
 use App\Http\Controllers\ReportDamageController;
 use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -88,7 +89,20 @@ Route::middleware('auth')->group(function () {
             'update' => 'reportdamages.update',
             'destroy' => 'reportdamages.destroy',
         ]);
+
+        // Additional routes for damage report verification
+        Route::get('/reportdamages/{reportDamage}/verify', [ReportDamageController::class, 'showVerify'])->name('reportdamages.verify.form');
+        Route::put('/reportdamages/{reportDamage}/verify', [ReportDamageController::class, 'verify'])->name('reportdamages.verify');
     });
+
+    // User dashboard routes for damage reports
+    Route::get('/user/report-damages', [ReportDamageController::class, 'userReports'])->name('user.report.damages');
+    Route::get('/user/report-damages/{reportDamage}', [ReportDamageController::class, 'userReportDetail'])->name('user.report.damage.detail');
 });
 
-require __DIR__.'/auth.php';
+// Public routes for damage reports
+Route::get('/public/report-damage', [PublicDamageReportController::class, 'showForm'])->name('public.report.damage.form');
+Route::post('/public/report-damage', [PublicDamageReportController::class, 'store'])->name('public.report.damage.store');
+Route::match(['get', 'post'], '/public/report-damage-status', [PublicDamageReportController::class, 'getStatus'])->name('public.report.damage.status');
+
+require __DIR__ . '/auth.php';
