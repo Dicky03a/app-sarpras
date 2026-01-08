@@ -1,0 +1,34 @@
+flowchart TD
+    Start([Start]) --> Login{User Login?}
+    Login -- No --> RedirectLogin[Redirect to Login]
+    Login -- Yes --> ViewAssets[View Available Assets]
+    
+    ViewAssets --> SelectAsset[Select Asset]
+    SelectAsset --> CheckAvail{Is Asset Available?}
+    CheckAvail -- No --> ErrorMsg[Show Error/Conflict]
+    CheckAvail -- Yes --> FillForm[Fill Borrowing Form\n(Date, Purpose, Evidence)]
+    
+    FillForm --> SubmitRequest[Submit Request]
+    SubmitRequest --> DB_Pending[Save to DB\n(Status: Pending)]
+    
+    DB_Pending --> AdminAction{<strong>Admin Review</strong>}
+    
+    AdminAction -- Reject --> DB_Rejected[Set Status: Ditolak]
+    DB_Rejected --> CreateRejection[Create Rejection Record]
+    CreateRejection --> NotifyUserReject[Notify User]
+    
+    AdminAction -- Approve --> DB_Approved[Set Status: Disetujui]
+    DB_Approved --> UpdateAssetBorrowed[Update Asset Status: Dipinjam]
+    UpdateAssetBorrowed --> AutoReject[Auto-reject Conflicting Requests]
+    AutoReject --> NotifyUserApprove[Notify User]
+    
+    NotifyUserApprove --> Handover{Asset Handover}
+    Handover --> MarkBorrowed[Admin Mark as Borrowed\n(Status: Dipinjam/Active)]
+    
+    MarkBorrowed --> Usage[Asset in Use]
+    
+    Usage --> Return{Asset Returned?}
+    Return -- Yes --> CheckCondition[Check Asset Condition]
+    CheckCondition --> MarkReturned[Admin Mark as Returned\n(Status: Selesai)]
+    MarkReturned --> UpdateAssetAvail[Update Asset Status: Tersedia]
+    UpdateAssetAvail --> End([End])

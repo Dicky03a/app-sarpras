@@ -1,0 +1,26 @@
+flowchart TD
+    Start([Start]) --> UserType{User Type}
+    
+    UserType -- Guest/Public --> FormPublic[Open Public Report Form]
+    FormPublic --> FillPublic[Fill: Name, Email, Asset, Desc, Photo]
+    FillPublic --> CheckUser{Email Exists?}
+    CheckUser -- No --> CreateUser[Create New User Account]
+    CheckUser -- Yes --> MatchUser[Link to Existing User]
+    CreateUser --> SubmitPublic[Submit Report]
+    MatchUser --> SubmitPublic
+    
+    UserType -- Registered --> Login[Login]
+    Login --> FormUser[Open User Report Form]
+    FormUser --> FillUser[Fill: Asset, Desc, Photo]
+    FillUser --> SubmitUser[Submit Report]
+    
+    SubmitUser --> DB_Report[Save Report\n(Status: Menunggu Verifikasi)]
+    SubmitPublic --> DB_Report
+    
+    DB_Report --> AdminView[Admin Views Reports]
+    AdminView --> Verification[Admin Verifies Condition]
+    
+    Verification --> UpdateStatus[Update Report Status: Selesai]
+    UpdateStatus --> UpdateAssetCond[Update Asset Condition\n(Baik/Rusak Ringan/Rusak Berat)]
+    UpdateAssetCond --> NotifyReporter[Notify Reporter]
+    NotifyReporter --> End([End])

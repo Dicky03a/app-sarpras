@@ -59,3 +59,118 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Database Design
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USERS ||--o{ BORROWINGS : "requests"
+    USERS ||--o{ REPORT_DAMAGES : "reports"
+    USERS ||--o{ BORROWING_MOVES : "admin_moves"
+    USERS ||--o{ NOTIFICATIONS : "receives"
+    
+    ASSET_CATEGORIES ||--o{ ASSETS : "categorizes"
+    
+    ASSETS ||--o{ BORROWINGS : "is_borrowed_in"
+    ASSETS ||--o{ REPORT_DAMAGES : "has_damage_reports"
+    ASSETS ||--o{ BORROWING_MOVES : "moved_from (old)"
+    ASSETS ||--o{ BORROWING_MOVES : "moved_to (new)"
+    
+    BORROWINGS ||--o| BORROWING_REJECTIONS : "may_have"
+    BORROWINGS ||--o{ BORROWING_MOVES : "can_be_moved"
+    
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string password
+        string role "implied (user/admin/superadmin)"
+        timestamp email_verified_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ASSET_CATEGORIES {
+        bigint id PK
+        string name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ASSETS {
+        bigint id PK
+        bigint category_id FK
+        string name
+        string slug
+        string kode_aset
+        string lokasi
+        enum kondisi "baik, rusak ringan, rusak berat"
+        text deskripsi
+        enum status "tersedia, dipinjam, rusak"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    BORROWINGS {
+        bigint id PK
+        bigint user_id FK "User who borrows"
+        bigint asset_id FK
+        bigint admin_id FK "Admin who processes"
+        date tanggal_mulai
+        date tanggal_selesai
+        text keperluan
+        string lampiran_bukti
+        enum status "pending, disetujui, ditolak, dipinjam, selesai"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    BORROWING_REJECTIONS {
+        bigint id PK
+        bigint borrowing_id FK
+        text alasan
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    BORROWING_MOVES {
+        bigint id PK
+        bigint borrowing_id FK
+        bigint old_asset_id FK
+        bigint new_asset_id FK
+        bigint admin_id FK
+        text alasan_pemindahan
+        timestamp moved_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    REPORT_DAMAGES {
+        bigint id PK
+        bigint user_id FK
+        bigint asset_id FK
+        bigint admin_id FK "Verifier"
+        text deskripsi_kerusakan
+        string foto_kerusakan
+        timestamp tanggal_lapor
+        enum status "menunggu_verifikasi, selesai"
+        enum kondisi_setelah_verifikasi "baik, rusak_ringan, rusak_berat"
+        text pesan_tindak_lanjut
+        timestamp tanggal_verifikasi
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    NOTIFICATIONS {
+        uuid id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        text data
+        timestamp read_at
+        timestamp created_at
+        timestamp updated_at
+    }
+```
