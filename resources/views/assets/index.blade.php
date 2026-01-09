@@ -3,9 +3,9 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Assets</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Asset</h1>
         <a href="{{ route('assets.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Add New Asset
+            Buat Asset
         </a>
     </div>
 

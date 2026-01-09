@@ -3,9 +3,9 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Asset Categories</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Categori</h1>
         <a href="{{ route('categories.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Add New Category
+            Buat Categori Baru
         </a>
     </div>
 
@@ -26,7 +26,7 @@
                         Name
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Created At
+                        Di Buat
                     </th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Actions

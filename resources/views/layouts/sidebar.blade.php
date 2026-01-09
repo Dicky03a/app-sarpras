@@ -20,8 +20,8 @@
                               <li><a href="#" class="flex gap-x-2 font-semibold text-base text-violet-700">My Overview</a></li>
                               <li><a href="{{ route('categories.index') }}" class="flex gap-x-2 font-semibold text-base">Category</a></li>
                               <li><a href="{{ route('assets.index') }}" class="flex gap-x-2 font-semibold text-base">Asset</a></li>
-                              <li><a href="{{ route('borrowings.index') }}" class="flex gap-x-2 font-semibold text-base">Borrowings</a></li>
-                              <li><a href="{{ route('reportdamages.index') }}" class="flex gap-x-2 font-semibold text-base">Report Damages</a></li>
+                              <li><a href="{{ route('borrowings.index') }}" class="flex gap-x-2 font-semibold text-base">Peminjaman</a></li>
+                              <!-- <li><a href="{{ route('reportdamages.index') }}" class="flex gap-x-2 font-semibold text-base">Report Damages</a></li> -->
                               <li><a href="{{ route('home') }}" class="flex gap-x-2 font-semibold text-base">Home</a></li>
                         </ul>
                   </div>

@@ -100,7 +100,6 @@
 
 </header>
 
-
 <section
       id="Benefits"
       class="w-full max-w-[1130px]
@@ -213,9 +212,6 @@
             </div>
       </div>
 </section>
-
-
-
 
 <section id="Cities" class="flex flex-col gap-8 mt-24 mx-5">
       <div class="w-full max-w-[1130px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
