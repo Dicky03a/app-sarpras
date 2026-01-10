@@ -80,6 +80,18 @@
                             @enderror
                         </div>
 
+                        {{-- WHATSAPP NUMBER --}}
+                        <div>
+                            <p class="font-semibold text-indigo-950 text-base mb-2">WhatsApp Number</p>
+                            <input type="tel" name="whatsapp_number" value="{{ old('whatsapp_number') }}"
+                                class="w-full py-3 rounded-full pl-5 pr-10 border border-gray-300 text-indigo-950 font-semibold"
+                                placeholder="+6281234567890">
+
+                            @error('whatsapp_number')
+                            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         {{-- SUBMIT --}}
                         <button type="submit"
                             class="w-full text-center px-7 rounded-full text-base py-3 font-semibold text-white bg-violet-700">
