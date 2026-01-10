@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
@@ -38,10 +39,17 @@ class AssetController extends Controller
             'kondisi' => 'required|in:baik,rusak ringan,rusak berat',
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,dipinjam,rusak',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Remove kode_aset from the request since it will be auto-generated
         $data = $request->all();
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $this->uploadPhoto($request->file('photo'));
+        }
+
+        // Remove kode_aset from the request since it will be auto-generated
         unset($data['kode_aset']);
 
         Asset::create($data);
@@ -80,10 +88,22 @@ class AssetController extends Controller
             'kondisi' => 'required|in:baik,rusak ringan,rusak berat',
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,dipinjam,rusak',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Remove kode_aset from the request since we don't want to update it
         $data = $request->all();
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($asset->photo) {
+                Storage::disk('public')->delete($asset->photo);
+            }
+
+            $data['photo'] = $this->uploadPhoto($request->file('photo'));
+        }
+
+        // Remove kode_aset from the request since we don't want to update it
         unset($data['kode_aset']);
 
         $asset->update($data);
@@ -97,9 +117,23 @@ class AssetController extends Controller
      */
     public function destroy(Asset $asset)
     {
+        // Delete photo if exists
+        if ($asset->photo) {
+            Storage::disk('public')->delete($asset->photo);
+        }
+
         $asset->delete();
 
         return redirect()->route('assets.index')
                          ->with('success', 'Asset deleted successfully.');
+    }
+
+    /**
+     * Upload photo and return the path
+     */
+    private function uploadPhoto($photo)
+    {
+        $fileName = time() . '_' . $photo->getClientOriginalName();
+        return $photo->storeAs('assets', $fileName, 'public');
     }
 }

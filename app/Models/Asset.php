@@ -20,6 +20,7 @@ class Asset extends Model
         'deskripsi',
         'status',
         'slug',
+        'photo',
     ];
 
     // Define the possible conditions for assets

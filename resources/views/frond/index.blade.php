@@ -258,7 +258,7 @@
 
                               <div class="relative w-[220px] sm:w-[240px] md:w-full h-[300px]">
                                     <img
-                                          src="/images/thumbnails/thumbnails-2.png"
+                                          src="{{ $asset->photo ? asset('storage/' . $asset->photo) : '/images/thumbnails/thumbnails-1.png' }}"
                                           class="absolute w-full h-full object-cover"
                                           alt="{{ $asset->name }}">
 
@@ -342,7 +342,7 @@
                               </p>
 
                               <img
-                                    src="{{ $asset->image ?? '/images/thumbnails/thumbnails-1.png' }}"
+                                    src="{{ $asset->photo ? asset('storage/' . $asset->photo) : '/images/thumbnails/thumbnails-1.png' }}"
                                     class="w-full h-full object-cover"
                                     alt="{{ $asset->name }}">
                         </div>

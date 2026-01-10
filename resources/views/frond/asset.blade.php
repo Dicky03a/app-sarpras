@@ -63,7 +63,7 @@
                                     </p>
 
                                     <img
-                                          src="{{ $asset->image ?? '/images/thumbnails/thumbnails-1.png' }}"
+                                          src="{{ $asset->photo ? asset('storage/' . $asset->photo) : '/images/thumbnails/thumbnails-1.png' }}"
                                           class="w-full h-full object-cover"
                                           alt="{{ $asset->name }}">
                               </div>

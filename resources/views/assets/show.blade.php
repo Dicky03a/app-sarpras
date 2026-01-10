@@ -69,6 +69,17 @@
                     <p class="text-gray-900">{{ $asset->deskripsi ?? '-' }}</p>
                 </div>
 
+                <div class="mb-4 md:col-span-2">
+                    <label class="block text-gray-700 mb-2 font-semibold">Photo</label>
+                    @if($asset->photo)
+                        <div>
+                            <img src="{{ asset('storage/' . $asset->photo) }}" alt="{{ $asset->name }}" class="w-64 h-64 object-cover rounded border">
+                        </div>
+                    @else
+                        <p class="text-gray-500 italic">No photo available</p>
+                    @endif
+                </div>
+
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2 font-semibold">Created At</label>
                     <p class="text-gray-900">{{ $asset->created_at->format('Y-m-d H:i:s') }}</p>

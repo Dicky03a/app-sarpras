@@ -5,7 +5,7 @@
     <div class="max-w-3xl mx-auto">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Create New Asset</h1>
 
-        <form action="{{ route('assets.store') }}" method="POST">
+        <form action="{{ route('assets.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="grid grid-cols-1 gap-6">
@@ -78,12 +78,23 @@
 
                     <div>
                         <label for="deskripsi" class="block text-gray-700 mb-2">Description</label>
-                        <textarea name="deskripsi" id="deskripsi" 
+                        <textarea name="deskripsi" id="deskripsi"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                   rows="4">{{ old('deskripsi') }}</textarea>
                         @error('deskripsi')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <div>
+                        <label for="photo" class="block text-gray-700 mb-2">Photo</label>
+                        <input type="file" name="photo" id="photo"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               accept="image/*">
+                        @error('photo')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-gray-500 text-xs mt-1">Max file size: 2MB. Allowed formats: jpeg, png, jpg, gif</p>
                     </div>
                 </div>
 

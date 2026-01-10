@@ -5,7 +5,7 @@
     <div class="max-w-3xl mx-auto">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Asset</h1>
 
-        <form action="{{ route('assets.update', $asset->id) }}" method="POST">
+        <form action="{{ route('assets.update', $asset->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="bg-white rounded-lg shadow p-6">
@@ -85,12 +85,29 @@
 
                     <div>
                         <label for="deskripsi" class="block text-gray-700 mb-2">Description</label>
-                        <textarea name="deskripsi" id="deskripsi" 
+                        <textarea name="deskripsi" id="deskripsi"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                   rows="4">{{ old('deskripsi', $asset->deskripsi) }}</textarea>
                         @error('deskripsi')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <div>
+                        <label for="photo" class="block text-gray-700 mb-2">Photo</label>
+                        @if($asset->photo)
+                            <div class="mb-2">
+                                <img src="{{ asset('storage/' . $asset->photo) }}" alt="Current Photo" class="w-32 h-32 object-cover rounded border">
+                                <p class="text-sm text-gray-500 mt-1">Current photo</p>
+                            </div>
+                        @endif
+                        <input type="file" name="photo" id="photo"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               accept="image/*">
+                        @error('photo')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-gray-500 text-xs mt-1">Max file size: 2MB. Allowed formats: jpeg, png, jpg, gif. Leave blank to keep current photo.</p>
                     </div>
                 </div>
 
