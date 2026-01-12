@@ -68,7 +68,7 @@
                   class="relative md:absolute right-0 w-full md:w-[calc(100%-((100%-1130px)/2)-305px)]
                    h-[300px] md:h-[720px]
                    md:rounded-bl-[40px] overflow-hidden mt-6 md:mt-0">
-                  <img src="/images/backgrounds/banner.webp"
+                  <img src="{{ asset('images/Arusgiri.com.jpg') }}"
                         class="w-full h-full object-cover" alt="hero background">
             </div>
       </section>
@@ -119,8 +119,8 @@
                    leading-tight md:leading-[48px]
                    text-center md:text-left
                    max-w-md">
-                  We Might Good <br>
-                  For Your Business
+                  Solusi Terbaik untuk <br>
+                  Pengelolaan Sarana dan Prasarana
             </h2>
 
             <!-- BENEFIT LIST -->
@@ -144,7 +144,7 @@
                                     Privacy-First Design
                               </p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Data sarana, prasarana, dan pengguna dikelola dengan sistem keamanan yang terjaga dan akses yang terkontrol.
                               </p>
                         </div>
                   </div>
@@ -156,7 +156,7 @@
                         <div class="flex flex-col gap-1">
                               <p class="font-bold text-base md:text-lg">Easy Move Access</p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Pengelolaan sarpras dapat diakses kapan saja dan di mana saja dengan sistem yang responsif dan user-friendly.
                               </p>
                         </div>
                   </div>
@@ -168,7 +168,7 @@
                         <div class="flex flex-col gap-1">
                               <p class="font-bold text-base md:text-lg">Flexibility Spaces</p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Mendukung berbagai jenis sarana dan prasarana sesuai kebutuhan instansi atau organisasi.
                               </p>
                         </div>
                   </div>
@@ -180,7 +180,7 @@
                         <div class="flex flex-col gap-1">
                               <p class="font-bold text-base md:text-lg">Top-Rated Office</p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Pengelolaan sarpras dilakukan secara rapi, terstruktur, dan sesuai standar administrasi yang baik.
                               </p>
                         </div>
                   </div>
@@ -192,7 +192,7 @@
                         <div class="flex flex-col gap-1">
                               <p class="font-bold text-base md:text-lg">Extra Snacks Available</p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Mendukung pencatatan fasilitas tambahan seperti inventaris penunjang dan perlengkapan operasional.
                               </p>
                         </div>
                   </div>
@@ -204,7 +204,7 @@
                         <div class="flex flex-col gap-1">
                               <p class="font-bold text-base md:text-lg">Sustain for Business</p>
                               <p class="text-sm leading-6 text-gray-600">
-                                    Lorem available without even higher tax that cost much
+                                    Membantu menjaga, memantau, dan mengoptimalkan penggunaan sarana dan prasarana secara berkelanjutan.
                               </p>
                         </div>
                   </div>
@@ -213,13 +213,13 @@
       </div>
 </section>
 
-<section id="Cities" class="flex flex-col gap-8 mt-24 mx-5">
-      <div class="w-full max-w-[1130px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<section id="Cities" class="flex flex-col gap-8 mt-24 px-5">
+      <div class="w-full max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <h2 class="font-bold text-3xl md:text-4xl leading-tight text-center md:text-left">
                   Category Aset<br>Pilih Sesuai Category
             </h2>
-            <div class="relative w-full md:w-auto">
-                  <select id="categoryFilter" class="rounded-full py-3 px-5 bg-white font-semibold shadow-md border border-gray-200 appearance-none cursor-pointer transition duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <div class="relative w-full md:w-auto min-w-[200px]">
+                  <select id="categoryFilter" class="w-full rounded-full py-3 px-5 pr-10 bg-white font-semibold shadow-md border border-gray-200 appearance-none cursor-pointer transition duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="">All Categories</option>
                         @foreach($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -234,62 +234,55 @@
             </div>
       </div>
 
-      <div class="w-full">
-
+      <div class="w-full max-w-[1200px] mx-auto">
             <div
                   id="assetsContainer"
-                  class="flex gap-6 px-6
-               overflow-x-auto
-               snap-x snap-mandatory
-               scroll-smooth
-               md:grid md:grid-cols-3 lg:grid-cols-4
-               md:overflow-visible">
-
+                  class="flex gap-4 px-2
+                        overflow-x-auto
+                        snap-x snap-mandatory
+                        scroll-smooth
+                        sm:grid sm:grid-cols-2
+                        md:grid-cols-3
+                        lg:grid-cols-4
+                        sm:overflow-visible
+                        pb-4">
                   @foreach($assets as $asset)
                   <div
-                        class="asset-item snap-start shrink-0
-                   md:shrink md:w-auto"
+                        class="asset-item snap-center shrink-0
+                              w-[220px]
+                              sm:w-auto"
                         data-category="{{ $asset->category_id }}">
-
                         <a href="{{ route('asset.show', $asset->slug) }}"
                               class="block rounded-2xl overflow-hidden
-                       shadow-lg hover:shadow-2xl
-                       transition-shadow duration-300">
-
-                              <div class="relative w-[220px] sm:w-[240px] md:w-full h-[300px]">
+                                    shadow-lg hover:shadow-2xl
+                                    transition-all duration-300
+                                    hover:scale-105">
+                              <div class="relative w-full h-[280px] sm:h-[300px]">
                                     <img
                                           src="{{ $asset->photo ? asset('storage/' . $asset->photo) : '/images/thumbnails/thumbnails-1.png' }}"
                                           class="absolute w-full h-full object-cover"
                                           alt="{{ $asset->name }}">
-
                                     <div
                                           class="absolute bottom-0 w-full p-4
-                               bg-gradient-to-t
-                               from-black/80 via-black/40 to-transparent
-                               text-white flex flex-col gap-1">
-
-                                          <h3 class="font-bold text-base md:text-lg">
+                                                bg-gradient-to-t
+                                                from-black/80 via-black/40 to-transparent
+                                                text-white flex flex-col gap-1">
+                                          <h3 class="font-bold text-base md:text-lg line-clamp-2">
                                                 {{ $asset->name }}
                                           </h3>
-
-                                          <p class="text-xs md:text-sm">
+                                          <p class="text-xs md:text-sm text-gray-200">
                                                 {{ $asset->kode_aset }}
                                           </p>
-
                                           <p class="text-xs md:text-sm font-semibold">
                                                 {{ $asset->category->name ?? 'N/A' }}
                                           </p>
                                     </div>
                               </div>
-
                         </a>
                   </div>
                   @endforeach
-
             </div>
       </div>
-
-
 </section>
 
 <section

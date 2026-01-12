@@ -22,21 +22,21 @@
 
         {{-- BACKDROP --}}
         <div x-show="sidebarOpen"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
-             @click="sidebarOpen = false"
-             x-cloak>
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+            @click="sidebarOpen = false"
+            x-cloak>
         </div>
 
         {{-- SIDEBAR --}}
         @include('layouts.sidebar')
 
-        <div class="flex-auto w-screen transition-all duration-300" :class="{'lg:pl-[250px]': sidebarOpen, 'lg:pl-[70px]': !sidebarOpen}">
+        <div class="flex-auto w-screen transition-all duration-300" :class="{'lg:pl-[10px]': sidebarOpen, 'lg:pl-[20px]': !sidebarOpen}">
 
             {{-- HEADER --}}
             @include('layouts.header')

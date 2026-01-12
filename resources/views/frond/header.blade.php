@@ -24,7 +24,7 @@
 
 
                   <div class="flex items-center w-fit rounded-full py-2 px-4 gap-2 bg-[#000929]">
-                        <img src="/images/icons/crown-white.svg" class="w-4 h-4 md:w-5 md:h-5" alt="icon">
+                        <img src="{{ asset('images/Arusgiri.com.jpg') }}" class="w-4 h-4 md:w-5 md:h-5" alt="icon">
                         <span class="text-sm md:text-base font-semibold text-white">
                               Dukung Aktivitas Lebih Optimal.
                         </span>
