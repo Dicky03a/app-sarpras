@@ -11,7 +11,6 @@
 </head>
 
 <body class="font-sans antialiased">
-      @include('layouts.navbar')
       @yield('content')
 </body>
 
