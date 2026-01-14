@@ -346,9 +346,8 @@ class BorrowingController extends Controller
             return redirect()->back()->with('error', 'Aset saat ini tidak tersedia untuk dipinjam.');
         }
 
-        // Check if asset isn't already borrowed during the requested period
         $existingBorrowing = Borrowing::where('asset_id', $request->asset_id)
-            ->where('status', 'dipinjam')  // Only check for active borrowings
+            ->where('status', 'dipinjam')
             ->where(function ($query) use ($request) {
                 $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
                     ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
@@ -365,24 +364,22 @@ class BorrowingController extends Controller
                 '. Silakan pilih tanggal lain atau aset lain.');
         }
 
-        // Handle file upload if provided
         $lampiranPath = null;
         if ($request->hasFile('lampiran_bukti')) {
             $lampiranPath = $request->file('lampiran_bukti')->store('borrowing_documents', 'public');
         }
 
         $borrowing = Borrowing::create([
-            'user_id' => auth()->id(), // The logged-in admin becomes the user
+            'user_id' => auth()->id(),
             'asset_id' => $request->asset_id,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
             'keperluan' => $request->keperluan,
             'lampiran_bukti' => $lampiranPath,
             'status' => $request->status,
-            'admin_id' => auth()->id(), // Admin who created this direct borrowing
+            'admin_id' => auth()->id(),
         ]);
 
-        // Update asset status if the borrowing is marked as 'dipinjam'
         if ($request->status === 'dipinjam') {
             $asset->update(['status' => 'dipinjam']);
         }
@@ -390,18 +387,13 @@ class BorrowingController extends Controller
         return redirect()->route('borrowings.index')->with('success', 'Peminjaman berhasil dibuat secara langsung.');
     }
 
-    /**
-     * Show the form for moving a borrowing to a different place.
-     */
     public function showMoveForm(Borrowing $borrowing)
     {
-        // Check if borrowing status is 'disetujui'
         if ($borrowing->status !== 'disetujui') {
             return redirect()->route('borrowings.index')
                 ->with('error', 'Hanya peminjaman dengan status "disetujui" yang dapat dipindahkan.');
         }
 
-        // Get all available assets (excluding the current one)
         $availableAssets = Asset::where('id', '!=', $borrowing->asset_id)
             ->where('status', 'tersedia')
             ->get();
@@ -409,9 +401,6 @@ class BorrowingController extends Controller
         return view('borrowings.move', compact('borrowing', 'availableAssets'));
     }
 
-    /**
-     * Move a borrowing to a different place.
-     */
     public function move(Request $request, Borrowing $borrowing)
     {
         $request->validate([
@@ -419,21 +408,17 @@ class BorrowingController extends Controller
             'alasan_pemindahan' => 'required|string|max:500',
         ]);
 
-        // Check if borrowing status is 'disetujui'
         if ($borrowing->status !== 'disetujui') {
             return redirect()->route('borrowings.index')
                 ->with('error', 'Hanya peminjaman dengan status "disetujui" yang dapat dipindahkan.');
         }
 
-        // Get the new asset
         $newAsset = Asset::find($request->new_asset_id);
 
-        // Check if new asset is available
         if ($newAsset->status !== 'tersedia') {
             return redirect()->back()->with('error', 'Tempat baru tidak tersedia untuk dipinjam.');
         }
 
-        // Check for conflicting borrowing requests for the new asset during the same period
         $conflictingBorrowings = Borrowing::where('asset_id', $request->new_asset_id)
             ->where('id', '!=', $borrowing->id)
             ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
@@ -451,11 +436,9 @@ class BorrowingController extends Controller
             return redirect()->back()->with('error', 'Tempat baru sudah dipesan untuk dipinjam oleh user lain pada rentang tanggal yang sama.');
         }
 
-        // Start transaction to ensure data consistency
         \DB::beginTransaction();
 
         try {
-            // Create a record in borrowing_moves table to track the move
             $borrowingMove = BorrowingMove::create([
                 'borrowing_id' => $borrowing->id,
                 'old_asset_id' => $borrowing->asset_id,
@@ -464,18 +447,15 @@ class BorrowingController extends Controller
                 'admin_id' => auth()->id(),
             ]);
 
-            // Update the borrowing record with the new asset
             $borrowing->update([
                 'asset_id' => $request->new_asset_id,
             ]);
 
-            // Update asset status: old asset becomes available, new asset becomes borrowed
-            $borrowing->asset->update(['status' => 'tersedia']); // old asset
-            $newAsset->update(['status' => 'dipinjam']); // new asset
+            $borrowing->asset->update(['status' => 'tersedia']);
+            $newAsset->update(['status' => 'dipinjam']);
 
             \DB::commit();
 
-            // Send notification to user about the move
             $this->sendMoveNotification($borrowing, $borrowingMove);
 
             return redirect()->route('borrowings.show', $borrowing->id)
@@ -486,12 +466,8 @@ class BorrowingController extends Controller
         }
     }
 
-    /**
-     * Send notification to user about the move.
-     */
     private function sendMoveNotification(Borrowing $borrowing, BorrowingMove $borrowingMove)
     {
-        // Send database notification to the user
         $borrowing->user->notify(new \App\Notifications\BorrowingMoveNotification($borrowingMove));
     }
 }

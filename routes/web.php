@@ -16,13 +16,13 @@ Route::get('/category', [FrontController::class, 'category'])->name('category.fr
 Route::get('/asset', [FrontController::class, 'asset'])->name('asset.front');
 Route::get('/asset/{slug}', [FrontController::class, 'showAsset'])->name('asset.show');
 
-// Dashboard route for backward compatibility with tests and general usage
+
+
+// Dashboard 
 Route::get('/dashboard', function () {
     if (auth()->check()) {
-        // Use helper function to determine redirect destination based on user role
         return redirect(getDashboardRedirect(auth()->user()));
     }
-
     return redirect()->route('login');
 })->middleware(['auth'])->name('dashboard');
 
@@ -78,31 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/borrowings/{borrowing}/reject', [BorrowingController::class, 'reject'])->name('borrowings.reject');
         Route::put('/borrowings/{borrowing}/mark-as-borrowed', [BorrowingController::class, 'markAsBorrowed'])->name('borrowings.markAsBorrowed');
         Route::put('/borrowings/{borrowing}/mark-as-returned', [BorrowingController::class, 'markAsReturned'])->name('borrowings.markAsReturned');
-
-        // Report Damage routes
-        Route::resource('/reportdamages', ReportDamageController::class)->names([
-            'index' => 'reportdamages.index',
-            'create' => 'reportdamages.create',
-            'store' => 'reportdamages.store',
-            'show' => 'reportdamages.show',
-            'edit' => 'reportdamages.edit',
-            'update' => 'reportdamages.update',
-            'destroy' => 'reportdamages.destroy',
-        ]);
-
-        // Additional routes for damage report verification
-        Route::get('/reportdamages/{reportDamage}/verify', [ReportDamageController::class, 'showVerify'])->name('reportdamages.verify.form');
-        Route::put('/reportdamages/{reportDamage}/verify', [ReportDamageController::class, 'verify'])->name('reportdamages.verify');
     });
-
-    // User dashboard routes for damage reports
-    Route::get('/user/report-damages', [ReportDamageController::class, 'userReports'])->name('user.report.damages');
-    Route::get('/user/report-damages/{reportDamage}', [ReportDamageController::class, 'userReportDetail'])->name('user.report.damage.detail');
 });
-
-// Public routes for damage reports
-Route::get('/public/report-damage', [PublicDamageReportController::class, 'showForm'])->name('public.report.damage.form');
-Route::post('/public/report-damage', [PublicDamageReportController::class, 'store'])->name('public.report.damage.store');
-Route::match(['get', 'post'], '/public/report-damage-status', [PublicDamageReportController::class, 'getStatus'])->name('public.report.damage.status');
 
 require __DIR__ . '/auth.php';

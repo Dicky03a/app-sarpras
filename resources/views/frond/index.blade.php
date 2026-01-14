@@ -17,7 +17,6 @@
                   <li><a href="#" class="hover:text-blue-600">Home</a></li>
                   <li><a href="#Cities" class="hover:text-blue-600">Categories</a></li>
                   <li><a href="#Fresh-Space" class="hover:text-blue-600">Aset</a></li>
-                  <!-- <li><a href="{{ route('public.report.damage.form') }}" class="hover:text-blue-600">Lapor</a></li> -->
             </ul>
 
             <!-- Desktop Auth Button -->
@@ -509,7 +508,6 @@
                               <li><a href="{{ route('home') }}" class="text-gray-200 hover:text-white transition">Home</a></li>
                               <li><a href="{{ route('asset.front') }}" class="text-gray-200 hover:text-white transition">Aset</a></li>
                               <li><a href="{{ route('category.front') }}" class="text-gray-200 hover:text-white transition">Categories</a></li>
-                              <li><a href="{{ route('public.report.damage.form') }}" class="text-gray-200 hover:text-white transition">Laporan Kerusakan</a></li>
                         </ul>
                   </div>
 

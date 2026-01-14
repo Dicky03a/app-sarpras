@@ -9,27 +9,19 @@ use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $assets = Asset::with('category')->get();
         return view('assets.index', compact('assets'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $categories = AssetCategory::all();
         return view('assets.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -44,41 +36,30 @@ class AssetController extends Controller
 
         $data = $request->all();
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
             $data['photo'] = $this->uploadPhoto($request->file('photo'));
         }
 
-        // Remove kode_aset from the request since it will be auto-generated
         unset($data['kode_aset']);
 
         Asset::create($data);
 
         return redirect()->route('assets.index')
-                         ->with('success', 'Asset created successfully.');
+            ->with('success', 'Asset created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Asset $asset)
     {
         $asset->load('category');
         return view('assets.show', compact('asset'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Asset $asset)
     {
         $categories = AssetCategory::all();
         return view('assets.edit', compact('asset', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Asset $asset)
     {
         $request->validate([
@@ -93,7 +74,6 @@ class AssetController extends Controller
 
         $data = $request->all();
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($asset->photo) {
@@ -103,18 +83,14 @@ class AssetController extends Controller
             $data['photo'] = $this->uploadPhoto($request->file('photo'));
         }
 
-        // Remove kode_aset from the request since we don't want to update it
         unset($data['kode_aset']);
 
         $asset->update($data);
 
         return redirect()->route('assets.index')
-                         ->with('success', 'Asset updated successfully.');
+            ->with('success', 'Asset updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Asset $asset)
     {
         // Delete photo if exists
@@ -125,12 +101,9 @@ class AssetController extends Controller
         $asset->delete();
 
         return redirect()->route('assets.index')
-                         ->with('success', 'Asset deleted successfully.');
+            ->with('success', 'Asset deleted successfully.');
     }
 
-    /**
-     * Upload photo and return the path
-     */
     private function uploadPhoto($photo)
     {
         $fileName = time() . '_' . $photo->getClientOriginalName();
