@@ -43,16 +43,15 @@
                               stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
             </button>
-      </div>
+      </div>x`
 
       <!-- Mobile Menu -->
       <div x-show="open" x-transition
             class="md:hidden bg-white border-t px-6 py-4 space-y-4">
 
-            <a href="{{ route('home') }}" class="block font-medium">Home</a>
-            <a href="{{ route('asset.front') }}" class="block font-medium">Aset</a>
-            <a href="{{ route('category.front') }}" class="block font-medium">Categories</a>
-            <a href="#" class="block font-medium">Lapor</a>
+            <a href="#" class="block font-medium">Home</a>
+            <a href="#Cities" class="block font-medium">Aset</a>
+            <a href="#Fresh-Space" class="block font-medium">Categories</a>
 
             <div class="pt-4 border-t">
                   @auth
@@ -417,10 +416,11 @@
                                leading-7 md:leading-[36px]">
                                     {{ $asset->name }}
                               </h3>
+                              <p class="font-semibold">{{ $asset->kode_aset }}</p>
 
                               <div class="flex items-center justify-between text-sm md:text-base">
-                                    <p class="font-semibold">{{ $asset->kode_aset }}</p>
-                                    <div class="flex items-center gap-1">
+
+                                    <div class="flex items-center">
                                           <p class="font-semibold">{{ $asset->category->name ?? 'N/A' }}</p>
                                           <img src="/images/icons/clock.svg" class="w-5 h-5">
                                     </div>
