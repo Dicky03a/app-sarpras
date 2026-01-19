@@ -5,8 +5,8 @@
     <div class="max-w-3xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Asset Details</h1>
-            <a href="{{ route('assets.index') }}" 
-               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('assets.index') }}"
+                class="px-5 py-2.5 bg-[#0D903A] text-white rounded-xl font-semibold hover:bg-[#0D903A]/90 transition shadow-sm">
                 Back to List
             </a>
         </div>
@@ -72,11 +72,11 @@
                 <div class="mb-4 md:col-span-2">
                     <label class="block text-gray-700 mb-2 font-semibold">Photo</label>
                     @if($asset->photo)
-                        <div>
-                            <img src="{{ asset('storage/' . $asset->photo) }}" alt="{{ $asset->name }}" class="w-64 h-64 object-cover rounded border">
-                        </div>
+                    <div>
+                        <img src="{{ asset('storage/' . $asset->photo) }}" alt="{{ $asset->name }}" class="w-64 h-64 object-cover rounded border">
+                    </div>
                     @else
-                        <p class="text-gray-500 italic">No photo available</p>
+                    <p class="text-gray-500 italic">No photo available</p>
                     @endif
                 </div>
 
@@ -92,15 +92,15 @@
             </div>
 
             <div class="flex items-center space-x-4 mt-6">
-                <a href="{{ route('assets.edit', $asset->id) }}" 
-                   class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('assets.edit', $asset->id) }}"
+                    class="px-5 py-2.5 bg-[#0D903A] text-white rounded-xl font-semibold hover:bg-[#0D903A]/90 transition shadow-sm">
                     Edit
                 </a>
                 <form action="{{ route('assets.destroy', $asset->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this asset?');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" 
-                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="submit"
+                        class="px-5 py-2.5 bg-[#0D903A] text-white rounded-xl font-semibold hover:bg-[#0D903A]/90 transition shadow-sm">
                         Delete
                     </button>
                 </form>

@@ -52,7 +52,7 @@
                                 required>
 
                             <a href="{{ route('password.request') }}"
-                                class="text-sm text-blue-700 text-right mt-1 block">
+                                class="text-sm text-green-600 text-right mt-1 block">
                                 Forgot Password?
                             </a>
 
@@ -63,13 +63,13 @@
 
                         {{-- SUBMIT --}}
                         <button type="submit"
-                            class="w-full rounded-full py-3 font-semibold text-white bg-violet-700">
+                            class="w-full rounded-full py-3 font-semibold text-white bg-green-600 hover:bg-green-700 transition duration-300">
                             Log In
                         </button>
 
                         <p class="text-sm text-center text-gray-600">
                             Don't have an account?
-                            <a href="{{ route('register') }}" class="text-blue-700 font-semibold">
+                            <a href="{{ route('register') }}" class="text-green-600 font-semibold">
                                 Sign Up
                             </a>
                         </p>
