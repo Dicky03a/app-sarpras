@@ -380,7 +380,7 @@
                         <!-- Content Section -->
                         <div class="p-6 space-y-4">
                               <div>
-                                    <h3 class="font-bold text-xl text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                    <h3 class="font-bold text-xl text-gray-900 mb-2 line-clamp-2 group-hover:text-green-400 transition-colors">
                                           {{ $asset->name }}
                                     </h3>
                                     <p class="text-sm font-mono text-gray-500 bg-gray-50 inline-block px-3 py-1 rounded-lg">

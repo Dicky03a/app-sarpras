@@ -10,7 +10,7 @@
 
             {{-- DESKTOP TOGGLE BUTTON --}}
             <button @click="sidebarOpen = !sidebarOpen"
-                  class="hidden lg:flex items-center gap-2 p-2.5 rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0D903A] focus:ring-offset-2 transition-all duration-200 active:scale-95 group">
+                  class="ml-4 hidden lg:flex items-center gap-2 p-2.5 rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0D903A] focus:ring-offset-2 transition-all duration-200 active:scale-95 group">
                   <svg class="w-5 h-5 transition-transform duration-300"
                         :class="sidebarOpen ? 'rotate-180' : ''"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">

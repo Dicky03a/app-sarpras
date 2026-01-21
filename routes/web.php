@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AssetCategoryController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\BorrowingController;
@@ -78,6 +79,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/borrowings/{borrowing}/reject', [BorrowingController::class, 'reject'])->name('borrowings.reject');
         Route::put('/borrowings/{borrowing}/mark-as-borrowed', [BorrowingController::class, 'markAsBorrowed'])->name('borrowings.markAsBorrowed');
         Route::put('/borrowings/{borrowing}/mark-as-returned', [BorrowingController::class, 'markAsReturned'])->name('borrowings.markAsReturned');
+
+        Route::get('/dashboard/export/pdf', [AdminDashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');
+        Route::get('/dashboard/export/excel', [AdminDashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
     });
 });
 

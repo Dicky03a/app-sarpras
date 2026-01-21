@@ -16,9 +16,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased" x-data="{ sidebarOpen: true }" @resize.window="if (window.innerWidth < 1024) sidebarOpen = false;">
+<body class="font-sans antialiased overflow-hidden" x-data="{ sidebarOpen: true }" @resize.window="if (window.innerWidth < 1024) sidebarOpen = false;">
 
-    <div class="flex flex-row justify-start">
+    <div class="flex flex-row h-screen">
 
         {{-- BACKDROP --}}
         <div x-show="sidebarOpen"
@@ -33,16 +33,18 @@
             x-cloak>
         </div>
 
-        {{-- SIDEBAR --}}
-        @include('layouts.sidebar')
+        {{-- SIDEBAR (FIXED) --}}
+        <div class="fixed left-0 top-0 h-screen z-40">
+            @include('layouts.sidebar')
+        </div>
 
-        <div class="flex-auto w-screen transition-all duration-300" :class="{'lg:pl-[10px]': sidebarOpen, 'lg:pl-[20px]': !sidebarOpen}">
+        <div class="flex flex-col flex-1 overflow-hidden transition-all duration-300" :class="{'lg:ml-[250px]': sidebarOpen, 'lg:ml-[80px]': !sidebarOpen}">
 
             {{-- HEADER --}}
             @include('layouts.header')
 
-            {{-- PAGE CONTENT --}}
-            <main class="p-7 pt-10">
+            {{-- PAGE CONTENT (SCROLLABLE) --}}
+            <main class="flex-1 overflow-y-auto p-7 pt-10">
                 @yield('content')
             </main>
 
