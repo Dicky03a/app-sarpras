@@ -143,12 +143,12 @@
                 </div>
 
                 {{-- Action Buttons --}}
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                    <a href="{{ url()->previous() }}" 
+                <div class="action-buttons flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                    <a href="{{ url()->previous() }}"
                        class="flex-1 sm:flex-none px-6 py-3.5 bg-white border-2 border-[#E0DEF7] text-[#000929] rounded-full font-semibold text-center hover:bg-gray-50 transition">
                         Batal
                     </a>
-                    <button type="submit" 
+                    <button type="submit"
                             class="flex-1 px-8 py-3.5 bg-[#000929] text-white rounded-full font-semibold hover:bg-[#000929]/90 transition flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -258,13 +258,92 @@
 
         const nextDay = tanggalMulai.toISOString().split('T')[0];
         document.getElementById('tanggal_selesai').min = nextDay;
-        
+
         // Clear tanggal selesai if it's before the new minimum
         const tanggalSelesai = document.getElementById('tanggal_selesai');
         if (tanggalSelesai.value && tanggalSelesai.value < nextDay) {
             tanggalSelesai.value = '';
         }
+
+        // Check availability when dates change
+        checkAvailability();
     });
+
+    document.getElementById('tanggal_selesai').addEventListener('change', function() {
+        // Check availability when dates change
+        checkAvailability();
+    });
+
+    // Function to check asset availability based on selected dates
+    async function checkAvailability() {
+        const startDate = document.getElementById('tanggal_mulai').value;
+        const endDate = document.getElementById('tanggal_selesai').value;
+        const assetId = {{ $asset->id }};
+
+        if (startDate && endDate) {
+            // Show loading indicator
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memeriksa ketersediaan...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/check-availability/${assetId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        tanggal_mulai: startDate,
+                        tanggal_selesai: endDate
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.available) {
+                    // Disable submit button and show warning
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    submitBtn.classList.remove('hover:bg-[#000929]/90');
+
+                    // Show warning about availability
+                    alert(`Peringatan: Aset ini sudah dipesan untuk tanggal ${startDate} hingga ${endDate}. Silakan pilih tanggal lain.`);
+
+                    // Add a note to the form
+                    let availabilityNote = document.getElementById('availability-note');
+                    if (!availabilityNote) {
+                        availabilityNote = document.createElement('div');
+                        availabilityNote.id = 'availability-note';
+                        availabilityNote.className = 'mt-3 p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm';
+                        document.querySelector('.action-buttons').prepend(availabilityNote);
+                    }
+                    availabilityNote.innerHTML = `<strong>Peringatan:</strong> Aset ini sudah dipesan untuk tanggal ${startDate} hingga ${endDate}. Silakan pilih tanggal lain.`;
+                } else {
+                    // Re-enable submit button if asset is available
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.classList.add('hover:bg-[#000929]/90');
+
+                    // Remove availability note if it exists
+                    const availabilityNote = document.getElementById('availability-note');
+                    if (availabilityNote) {
+                        availabilityNote.remove();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking availability:', error);
+                // Still enable the button in case of error
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:bg-[#000929]/90');
+            } finally {
+                // Restore button text
+                submitBtn.innerHTML = originalText;
+            }
+        }
+    }
 
     // File upload preview
     document.getElementById('lampiran_bukti').addEventListener('change', function(e) {

@@ -78,10 +78,7 @@ class BorrowingController extends Controller
                 'admin_id' => $request->admin_id,
             ]);
 
-            // Update asset status to 'dipinjam'
-            $borrowing->asset->update(['status' => 'dipinjam']);
-
-            // Reject all conflicting borrowing requests
+            // Reject all conflicting borrowing requests (but don't change asset status yet)
             $rejectedCount = $this->rejectConflictingBorrowings(
                 $conflictingBorrowings,
                 $request->admin_id,
@@ -90,7 +87,7 @@ class BorrowingController extends Controller
 
             DB::commit();
 
-            $message = 'Peminjaman berhasil disetujui. Aset sekarang dalam status "dipinjam".';
+            $message = 'Peminjaman berhasil disetujui.';
             if ($rejectedCount > 0) {
                 $message .= " {$rejectedCount} peminjaman lain yang memiliki konflik jadwal telah ditolak otomatis.";
             }
@@ -253,17 +250,6 @@ class BorrowingController extends Controller
             return $this->handleUnavailableAsset($asset);
         }
 
-        // Check for active borrowing conflicts
-        $activeBorrowing = Borrowing::where('asset_id', $asset->id)
-            ->where('status', 'dipinjam')
-            ->first();
-
-        if ($activeBorrowing) {
-            $endDate = Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y');
-            return redirect()->back()
-                ->with('error', "Aset ini sedang dipinjam oleh user lain sampai tanggal {$endDate}. Silakan pilih tanggal lain atau aset lain.");
-        }
-
         return view('borrowings.create', compact('asset'));
     }
 
@@ -394,9 +380,12 @@ class BorrowingController extends Controller
                 'admin_id' => auth()->id(),
             ]);
 
-            // Update asset status if borrowing is active
+            // Update asset status only if borrowing is actively borrowed
             if ($request->status === 'dipinjam') {
                 $asset->update(['status' => 'dipinjam']);
+            } elseif ($request->status === 'disetujui') {
+                // Don't change asset status when creating a direct booking with 'disetujui' status
+                // The asset remains 'tersedia' until the borrowing actually begins
             }
 
             DB::commit();
@@ -548,7 +537,7 @@ class BorrowingController extends Controller
     private function checkBorrowingConflict($assetId, $startDate, $endDate)
     {
         return Borrowing::where('asset_id', $assetId)
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('tanggal_mulai', [$startDate, $endDate])
                     ->orWhereBetween('tanggal_selesai', [$startDate, $endDate])
@@ -565,6 +554,7 @@ class BorrowingController extends Controller
      */
     private function handleUnavailableAsset($asset)
     {
+        // Check if asset is currently borrowed
         if ($asset->status === 'dipinjam') {
             $activeBorrowing = Borrowing::where('asset_id', $asset->id)
                 ->where('status', 'dipinjam')
@@ -577,6 +567,18 @@ class BorrowingController extends Controller
             }
         }
 
+        // Check for upcoming bookings that might affect availability
+        $upcomingBooking = Borrowing::where('asset_id', $asset->id)
+            ->whereIn('status', ['pending', 'disetujui'])
+            ->where('tanggal_mulai', '>=', Carbon::now())
+            ->first();
+
+        if ($upcomingBooking) {
+            $startDate = Carbon::parse($upcomingBooking->tanggal_mulai)->format('d F Y');
+            return redirect()->back()
+                ->with('error', "Aset ini telah dipesan untuk dipinjam mulai tanggal {$startDate}. Silakan pilih tanggal lain atau aset lain.");
+        }
+
         return redirect()->back()
             ->with('error', 'Aset saat ini tidak tersedia untuk dipinjam.');
     }
@@ -587,5 +589,28 @@ class BorrowingController extends Controller
     private function sendMoveNotification(Borrowing $borrowing, BorrowingMove $borrowingMove)
     {
         $borrowing->user->notify(new BorrowingMoveNotification($borrowingMove));
+    }
+
+    /**
+     * Check asset availability for given date range.
+     */
+    public function checkAvailability(Request $request, Asset $asset)
+    {
+        $request->validate([
+            'tanggal_mulai' => 'required|date|after_or_equal:today',
+            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+        ]);
+
+        // Check for borrowing conflicts during the requested period
+        $existingBorrowing = $this->checkBorrowingConflict(
+            $asset->id,
+            $request->tanggal_mulai,
+            $request->tanggal_selesai
+        );
+
+        return response()->json([
+            'available' => !$existingBorrowing,
+            'message' => $existingBorrowing ? 'Aset sudah dipesan untuk periode tersebut.' : 'Aset tersedia untuk periode tersebut.'
+        ]);
     }
 }

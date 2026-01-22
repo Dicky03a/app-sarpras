@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     // Borrowing user routes - accessible by all authenticated users
     Route::get('/borrowings/create/{asset}', [BorrowingController::class, 'create'])->name('borrowings.create');
     Route::post('/borrowings', [BorrowingController::class, 'store'])->name('borrowings.store');
+    Route::post('/api/check-availability/{asset}', [BorrowingController::class, 'checkAvailability'])->name('borrowings.check.availability');
 
     // Admin routes - only accessible by users with admin or superadmin role
     Route::middleware('role:admin')->group(function () {
