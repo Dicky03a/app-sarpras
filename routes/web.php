@@ -6,8 +6,6 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicDamageReportController;
-use App\Http\Controllers\ReportDamageController;
 use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +14,7 @@ Route::get('/', [FrontController::class, 'index'])->name('home');
 Route::get('/category', [FrontController::class, 'category'])->name('category.front');
 Route::get('/asset', [FrontController::class, 'asset'])->name('asset.front');
 Route::get('/asset/{slug}', [FrontController::class, 'showAsset'])->name('asset.show');
+Route::get('/assets/search', [FrontController::class, 'search'])->name('assets.search');
 
 
 

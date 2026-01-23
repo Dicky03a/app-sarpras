@@ -37,4 +37,24 @@ class FrontController extends Controller
 
         return view('frond.components.details', compact('asset'));
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+
+        $assets = Asset::where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('kode_aset', 'LIKE', "%{$query}%")
+                    ->orWhereHas('category', function($q) use ($query) {
+                        $q->where('name', 'LIKE', "%{$query}%");
+                    })
+                    ->orWhere('lokasi', 'LIKE', "%{$query}%")
+                    ->orWhere('kondisi', 'LIKE', "%{$query}%")
+                    ->orWhere('status', 'LIKE', "%{$query}%")
+                    ->with('category')
+                    ->get();
+
+        $categories = AssetCategory::all();
+
+        return view('frond.search-results', compact('assets', 'categories', 'query'));
+    }
 }
