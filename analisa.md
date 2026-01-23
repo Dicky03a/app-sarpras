@@ -83,7 +83,7 @@ Rekomendasi:
 Implementasi file validation yang lebih ketat
 Gunakan package seperti intervention/image untuk validasi image
 Tambahkan virus scanning jika memungkinkan
-c. Missing Authorization Checks
+<!-- c. Missing Authorization Checks
 // ReportDamageController.php - edit() tidak cek ownership
 public function edit(ReportDamage $reportDamage)
 {
@@ -97,7 +97,7 @@ Tidak ada policy untuk authorization
 Rekomendasi:
 
 Buat Policy untuk setiap model (AssetPolicy, BorrowingPolicy, ReportDamagePolicy)
-Implementasi authorization di controller
+Implementasi authorization di controller -->
 d. Sensitive Data Exposure
 // .env.example masih menggunakan default values
 DB_DATABASE=tamplate1  // Typo dan nama tidak profesional

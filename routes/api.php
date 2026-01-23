@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BorrowingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function () {
     return auth()->user();
 });
+
+// Asset availability check API route
+Route::middleware(['auth:sanctum', 'throttle:api'])->post('/check-availability/{asset}', [BorrowingController::class, 'checkAvailability'])->name('api.borrowings.check.availability');
