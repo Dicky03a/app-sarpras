@@ -29,17 +29,17 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         <div>
-                            <label for="tanggal_mulai" class="block font-semibold text-sm mb-2">
-                                Tanggal Mulai <span class="text-red-500">*</span>
+                            <label for="start_datetime" class="block font-semibold text-sm mb-2">
+                                Tanggal & Jam Mulai <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <input type="date" name="tanggal_mulai" id="tanggal_mulai"
+                                <input type="datetime-local" name="start_datetime" id="start_datetime"
                                        class="w-full px-4 py-3 border border-[#E0DEF7] rounded-xl focus:ring-2 focus:ring-[#000929] focus:border-transparent transition"
-                                       min="{{ date('Y-m-d') }}" 
-                                       value="{{ old('tanggal_mulai') }}"
+                                       min="{{ date('Y-m-d\TH:i') }}"
+                                       value="{{ old('start_datetime') }}"
                                        required>
                             </div>
-                            @error('tanggal_mulai')
+                            @error('start_datetime')
                                 <p class="text-red-600 text-sm mt-1.5 flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
                                         <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -50,17 +50,17 @@
                         </div>
 
                         <div>
-                            <label for="tanggal_selesai" class="block font-semibold text-sm mb-2">
-                                Tanggal Selesai <span class="text-red-500">*</span>
+                            <label for="end_datetime" class="block font-semibold text-sm mb-2">
+                                Tanggal & Jam Selesai <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <input type="date" name="tanggal_selesai" id="tanggal_selesai"
+                                <input type="datetime-local" name="end_datetime" id="end_datetime"
                                        class="w-full px-4 py-3 border border-[#E0DEF7] rounded-xl focus:ring-2 focus:ring-[#000929] focus:border-transparent transition"
-                                       min="{{ date('Y-m-d') }}"
-                                       value="{{ old('tanggal_selesai') }}"
+                                       min="{{ date('Y-m-d\TH:i') }}"
+                                       value="{{ old('end_datetime') }}"
                                        required>
                             </div>
-                            @error('tanggal_selesai')
+                            @error('end_datetime')
                                 <p class="text-red-600 text-sm mt-1.5 flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
                                         <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -252,35 +252,35 @@
 </section>
 
 <script>
-    document.getElementById('tanggal_mulai').addEventListener('change', function() {
-        const tanggalMulai = new Date(this.value);
-        tanggalMulai.setDate(tanggalMulai.getDate() + 1);
+    document.getElementById('start_datetime').addEventListener('change', function() {
+        const startDateTime = new Date(this.value);
 
-        const nextDay = tanggalMulai.toISOString().split('T')[0];
-        document.getElementById('tanggal_selesai').min = nextDay;
+        // Set minimum for end_datetime to be at least 1 hour after start
+        const minEndDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // Add 1 hour
+        document.getElementById('end_datetime').min = minEndDateTime.toISOString().slice(0, 16);
 
-        // Clear tanggal selesai if it's before the new minimum
-        const tanggalSelesai = document.getElementById('tanggal_selesai');
-        if (tanggalSelesai.value && tanggalSelesai.value < nextDay) {
-            tanggalSelesai.value = '';
+        // Clear end_datetime if it's before the new minimum
+        const endDateTime = document.getElementById('end_datetime');
+        if (endDateTime.value && new Date(endDateTime.value) < minEndDateTime) {
+            endDateTime.value = '';
         }
 
         // Check availability when dates change
         checkAvailability();
     });
 
-    document.getElementById('tanggal_selesai').addEventListener('change', function() {
+    document.getElementById('end_datetime').addEventListener('change', function() {
         // Check availability when dates change
         checkAvailability();
     });
 
-    // Function to check asset availability based on selected dates
+    // Function to check asset availability based on selected datetimes
     async function checkAvailability() {
-        const startDate = document.getElementById('tanggal_mulai').value;
-        const endDate = document.getElementById('tanggal_selesai').value;
+        const startDateTime = document.getElementById('start_datetime').value;
+        const endDateTime = document.getElementById('end_datetime').value;
         const assetId = {{ $asset->id }};
 
-        if (startDate && endDate) {
+        if (startDateTime && endDateTime) {
             // Show loading indicator
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -297,8 +297,8 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        tanggal_mulai: startDate,
-                        tanggal_selesai: endDate
+                        start_datetime: startDateTime,
+                        end_datetime: endDateTime
                     })
                 });
 
@@ -311,7 +311,7 @@
                     submitBtn.classList.remove('hover:bg-[#000929]/90');
 
                     // Show warning about availability
-                    alert(`Peringatan: Aset ini sudah dipesan untuk tanggal ${startDate} hingga ${endDate}. Silakan pilih tanggal lain.`);
+                    alert(`Peringatan: Aset ini sudah dipesan untuk periode tersebut. Silakan pilih waktu lain.`);
 
                     // Add a note to the form
                     let availabilityNote = document.getElementById('availability-note');
@@ -321,7 +321,7 @@
                         availabilityNote.className = 'mt-3 p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm';
                         document.querySelector('.action-buttons').prepend(availabilityNote);
                     }
-                    availabilityNote.innerHTML = `<strong>Peringatan:</strong> Aset ini sudah dipesan untuk tanggal ${startDate} hingga ${endDate}. Silakan pilih tanggal lain.`;
+                    availabilityNote.innerHTML = `<strong>Peringatan:</strong> Aset ini sudah dipesan untuk periode tersebut. Silakan pilih waktu lain.`;
                 } else {
                     // Re-enable submit button if asset is available
                     submitBtn.disabled = false;

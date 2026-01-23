@@ -84,8 +84,8 @@ class BorrowingController extends Controller
             $conflictingBorrowings = $this->getConflictingBorrowings(
                 $borrowing->asset_id,
                 $borrowing->id,
-                $borrowing->tanggal_mulai,
-                $borrowing->tanggal_selesai,
+                $borrowing->start_datetime,
+                $borrowing->end_datetime,
                 ['pending', 'disetujui']
             );
 
@@ -201,8 +201,8 @@ class BorrowingController extends Controller
             $conflictingBorrowings = $this->getConflictingBorrowings(
                 $borrowing->asset_id,
                 $borrowing->id,
-                $borrowing->tanggal_mulai,
-                $borrowing->tanggal_selesai,
+                $borrowing->start_datetime,
+                $borrowing->end_datetime,
                 ['pending', 'disetujui']
             );
 
@@ -321,7 +321,7 @@ class BorrowingController extends Controller
      * 4. The borrowing status starts as 'pending' awaiting admin approval
      * 5. File uploads are validated and sanitized for security
      *
-     * @param Request $request Contains asset_id, tanggal_mulai, tanggal_selesai, keperluan, and lampiran_bukti
+     * @param Request $request Contains asset_id, start_datetime, end_datetime, keperluan, and lampiran_bukti
      * @return \Illuminate\Http\RedirectResponse Redirects to user dashboard with success/error message
      * @throws \Exception If database transaction fails
      */
@@ -329,8 +329,8 @@ class BorrowingController extends Controller
     {
         $request->validate([
             'asset_id' => 'required|exists:assets,id',
-            'tanggal_mulai' => 'required|date|after_or_equal:today',
-            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'start_datetime' => 'required|date|after_or_equal:today',
+            'end_datetime' => 'required|date|after:start_datetime',
             'keperluan' => 'required|string|max:500',
             'lampiran_bukti' => ['required', 'file', new SecureFileUpload()],
         ]);
@@ -342,17 +342,17 @@ class BorrowingController extends Controller
             return $this->handleUnavailableAsset($asset);
         }
 
-        // Business Rule: Check for date conflicts with existing borrowings
+        // Business Rule: Check for datetime conflicts with existing borrowings
         $existingBorrowing = $this->checkBorrowingConflict(
             $request->asset_id,
-            $request->tanggal_mulai,
-            $request->tanggal_selesai
+            $request->start_datetime,
+            $request->end_datetime
         );
 
         if ($existingBorrowing) {
-            $endDate = Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y');
+            $endDate = Carbon::parse($existingBorrowing->end_datetime)->format('d F Y H:i');
             return redirect()->back()
-                ->with('error', "Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal {$endDate}. Silakan pilih tanggal lain atau aset lain.");
+                ->with('error', "Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal {$endDate}. Silakan pilih waktu lain atau aset lain.");
         }
 
         DB::beginTransaction();
@@ -371,8 +371,10 @@ class BorrowingController extends Controller
             Borrowing::create([
                 'user_id' => auth()->id(),
                 'asset_id' => $request->asset_id,
-                'tanggal_mulai' => $request->tanggal_mulai,
-                'tanggal_selesai' => $request->tanggal_selesai,
+                'tanggal_mulai' => Carbon::parse($request->start_datetime)->toDateString(), // Keep for backward compatibility
+                'tanggal_selesai' => Carbon::parse($request->end_datetime)->toDateString(), // Keep for backward compatibility
+                'start_datetime' => $request->start_datetime,
+                'end_datetime' => $request->end_datetime,
                 'keperluan' => $request->keperluan,
                 'lampiran_bukti' => $lampiranPath,
                 'status' => 'pending',
@@ -410,7 +412,7 @@ class BorrowingController extends Controller
      * 5. If status is 'dipinjam', asset status is immediately updated to 'dipinjam'
      * 6. If status is 'disetujui', asset status remains 'tersedia' until borrowed
      *
-     * @param Request $request Contains asset_id, tanggal_mulai, tanggal_selesai, keperluan, status, and optional lampiran_bukti
+     * @param Request $request Contains asset_id, start_datetime, end_datetime, keperluan, status, and optional lampiran_bukti
      * @return \Illuminate\Http\RedirectResponse Redirects to borrowings index with success/error message
      * @throws \Exception If database transaction fails
      */
@@ -418,8 +420,8 @@ class BorrowingController extends Controller
     {
         $request->validate([
             'asset_id' => 'required|exists:assets,id',
-            'tanggal_mulai' => 'required|date|after_or_equal:today',
-            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'start_datetime' => 'required|date|after_or_equal:today',
+            'end_datetime' => 'required|date|after:start_datetime',
             'keperluan' => 'required|string|max:500',
             'status' => 'required|in:pending,disetujui,dipinjam,selesai,ditolak',
             'lampiran_bukti' => ['nullable', 'file', new SecureFileUpload()],
@@ -432,17 +434,17 @@ class BorrowingController extends Controller
             return $this->handleUnavailableAsset($asset);
         }
 
-        // Business Rule: Check for date conflicts even with direct bookings
+        // Business Rule: Check for datetime conflicts even with direct bookings
         $existingBorrowing = $this->checkBorrowingConflict(
             $request->asset_id,
-            $request->tanggal_mulai,
-            $request->tanggal_selesai
+            $request->start_datetime,
+            $request->end_datetime
         );
 
         if ($existingBorrowing) {
-            $endDate = Carbon::parse($existingBorrowing->tanggal_selesai)->format('d F Y');
+            $endDate = Carbon::parse($existingBorrowing->end_datetime)->format('d F Y H:i');
             return redirect()->back()
-                ->with('error', "Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal {$endDate}. Silakan pilih tanggal lain atau aset lain.");
+                ->with('error', "Aset sudah dipinjam oleh user lain pada periode yang diminta. Aset akan tersedia kembali pada tanggal {$endDate}. Silakan pilih waktu lain atau aset lain.");
         }
 
         DB::beginTransaction();
@@ -463,8 +465,10 @@ class BorrowingController extends Controller
             Borrowing::create([
                 'user_id' => auth()->id(),
                 'asset_id' => $request->asset_id,
-                'tanggal_mulai' => $request->tanggal_mulai,
-                'tanggal_selesai' => $request->tanggal_selesai,
+                'tanggal_mulai' => Carbon::parse($request->start_datetime)->toDateString(), // Keep for backward compatibility
+                'tanggal_selesai' => Carbon::parse($request->end_datetime)->toDateString(), // Keep for backward compatibility
+                'start_datetime' => $request->start_datetime,
+                'end_datetime' => $request->end_datetime,
                 'keperluan' => $request->keperluan,
                 'lampiran_bukti' => $lampiranPath,
                 'status' => $request->status,
@@ -549,8 +553,8 @@ class BorrowingController extends Controller
         $conflictingBorrowings = $this->getConflictingBorrowings(
             $request->new_asset_id,
             $borrowing->id,
-            $borrowing->tanggal_mulai,
-            $borrowing->tanggal_selesai,
+            $borrowing->start_datetime,
+            $borrowing->end_datetime,
             ['pending', 'disetujui', 'dipinjam']
         );
 
@@ -605,26 +609,21 @@ class BorrowingController extends Controller
      *
      * @param int $assetId The asset ID to check for conflicts
      * @param int $excludeBorrowingId The borrowing ID to exclude from results
-     * @param string $startDate The start date to check conflicts for
-     * @param string $endDate The end date to check conflicts for
+     * @param string $startDateTime The start datetime to check conflicts for
+     * @param string $endDateTime The end datetime to check conflicts for
      * @param array $statuses Array of statuses to include in the conflict check
      * @return \Illuminate\Database\Eloquent\Collection Collection of conflicting borrowings
      */
-    private function getConflictingBorrowings($assetId, $excludeBorrowingId, $startDate, $endDate, array $statuses)
+    private function getConflictingBorrowings($assetId, $excludeBorrowingId, $startDateTime, $endDateTime, array $statuses)
     {
         return Borrowing::where('asset_id', $assetId)
             ->where('id', '!=', $excludeBorrowingId)
             ->whereIn('status', $statuses)
-            // Check for overlapping date ranges:
+            // Check for overlapping datetime ranges:
             // Period A overlaps with Period B if A starts before B ends AND A ends after B starts
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal_mulai', [$startDate, $endDate])  // New start falls within existing period
-                    ->orWhereBetween('tanggal_selesai', [$startDate, $endDate])  // New end falls within existing period
-                    ->orWhere(function ($q) use ($startDate, $endDate) {
-                        // New period completely encompasses existing period
-                        $q->where('tanggal_mulai', '<=', $startDate)
-                            ->where('tanggal_selesai', '>=', $endDate);
-                    });
+            ->where(function ($query) use ($startDateTime, $endDateTime) {
+                $query->where('start_datetime', '<', $endDateTime)  // New start is before existing end
+                    ->where('end_datetime', '>', $startDateTime);  // New end is after existing start
             })
             ->get();
     }
@@ -663,24 +662,19 @@ class BorrowingController extends Controller
      * - Overlap is determined using the same logic as getConflictingBorrowings()
      *
      * @param int $assetId The asset ID to check for conflicts
-     * @param string $startDate The proposed start date
-     * @param string $endDate The proposed end date
+     * @param string $startDateTime The proposed start datetime
+     * @param string $endDateTime The proposed end datetime
      * @return \App\Models\Borrowing|null Returns the first conflicting borrowing or null if none found
      */
-    private function checkBorrowingConflict($assetId, $startDate, $endDate)
+    private function checkBorrowingConflict($assetId, $startDateTime, $endDateTime)
     {
         return Borrowing::where('asset_id', $assetId)
             ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
-            // Check for overlapping date ranges:
+            // Check for overlapping datetime ranges:
             // Period A overlaps with Period B if A starts before B ends AND A ends after B starts
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal_mulai', [$startDate, $endDate])  // Proposed start falls within existing period
-                    ->orWhereBetween('tanggal_selesai', [$startDate, $endDate])  // Proposed end falls within existing period
-                    ->orWhere(function ($q) use ($startDate, $endDate) {
-                        // Proposed period completely encompasses existing period
-                        $q->where('tanggal_mulai', '<=', $startDate)
-                            ->where('tanggal_selesai', '>=', $endDate);
-                    });
+            ->where(function ($query) use ($startDateTime, $endDateTime) {
+                $query->where('start_datetime', '<', $endDateTime)  // Proposed start is before existing end
+                    ->where('end_datetime', '>', $startDateTime);  // Proposed end is after existing start
             })
             ->first();
     }
@@ -706,9 +700,9 @@ class BorrowingController extends Controller
                 ->first();
 
             if ($activeBorrowing) {
-                $endDate = Carbon::parse($activeBorrowing->tanggal_selesai)->format('d F Y');
+                $endDate = Carbon::parse($activeBorrowing->end_datetime)->format('d F Y H:i');
                 return redirect()->back()
-                    ->with('error', "Aset ini sedang dipinjam oleh user lain sampai tanggal {$endDate}. Silakan pilih tanggal lain atau aset lain.");
+                    ->with('error', "Aset ini sedang dipinjam oleh user lain sampai tanggal {$endDate}. Silakan pilih waktu lain atau aset lain.");
             }
         }
 
@@ -719,9 +713,9 @@ class BorrowingController extends Controller
             ->first();
 
         if ($upcomingBooking) {
-            $startDate = Carbon::parse($upcomingBooking->tanggal_mulai)->format('d F Y');
+            $startDate = Carbon::parse($upcomingBooking->start_datetime)->format('d F Y H:i');
             return redirect()->back()
-                ->with('error', "Aset ini telah dipesan untuk dipinjam mulai tanggal {$startDate}. Silakan pilih tanggal lain atau aset lain.");
+                ->with('error', "Aset ini telah dipesan untuk dipinjam mulai tanggal {$startDate}. Silakan pilih waktu lain atau aset lain.");
         }
 
         return redirect()->back()
@@ -796,16 +790,16 @@ class BorrowingController extends Controller
     public function checkAvailability(Request $request, Asset $asset)
     {
         $request->validate([
-            'tanggal_mulai' => 'required|date|after_or_equal:today',
-            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'start_datetime' => 'required|date|after_or_equal:today',
+            'end_datetime' => 'required|date|after:start_datetime',
         ]);
 
         // Business Rule: Check for borrowing conflicts during the requested period
         // Only consider borrowings with status 'pending', 'disetujui', or 'dipinjam'
         $existingBorrowing = $this->checkBorrowingConflict(
             $asset->id,
-            $request->tanggal_mulai,
-            $request->tanggal_selesai
+            $request->start_datetime,
+            $request->end_datetime
         );
 
         return response()->json([

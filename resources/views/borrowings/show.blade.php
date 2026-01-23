@@ -88,25 +88,25 @@
                         </div>
                     </div>
 
-                    <!-- Start Date -->
+                    <!-- Start Date & Time -->
                     <div class="space-y-1">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</label>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal & Jam Mulai</label>
                         <div class="flex items-center mt-2">
                             <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <p class="text-base text-gray-900">{{ $borrowing->tanggal_mulai->format('d F Y') }}</p>
+                            <p class="text-base text-gray-900">{{ $borrowing->start_datetime ? $borrowing->start_datetime->format('d F Y H:i') : $borrowing->tanggal_mulai->format('d F Y') . ' 00:00' }}</p>
                         </div>
                     </div>
 
-                    <!-- End Date -->
+                    <!-- End Date & Time -->
                     <div class="space-y-1">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Selesai</label>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal & Jam Selesai</label>
                         <div class="flex items-center mt-2">
                             <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <p class="text-base text-gray-900">{{ $borrowing->tanggal_selesai->format('d F Y') }}</p>
+                            <p class="text-base text-gray-900">{{ $borrowing->end_datetime ? $borrowing->end_datetime->format('d F Y H:i') : $borrowing->tanggal_selesai->format('d F Y') . ' 23:59' }}</p>
                         </div>
                     </div>
 

@@ -64,11 +64,11 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="tanggal_mulai" class="block text-sm text-gray-600 mb-2">Tanggal Mulai <span class="text-red-500">*</span></label>
-                            <input type="date" name="tanggal_mulai" id="tanggal_mulai"
+                            <label for="start_datetime" class="block text-sm text-gray-600 mb-2">Tanggal & Jam Mulai <span class="text-red-500">*</span></label>
+                            <input type="datetime-local" name="start_datetime" id="start_datetime"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#000929] focus:border-transparent"
-                                min="{{ date('Y-m-d') }}" value="{{ old('tanggal_mulai') }}" required>
-                            @error('tanggal_mulai')
+                                min="{{ date('Y-m-d\TH:i') }}" value="{{ old('start_datetime') }}" required>
+                            @error('start_datetime')
                             <p class="text-red-600 text-sm mt-1.5 flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
                                     <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -79,11 +79,11 @@
                         </div>
 
                         <div>
-                            <label for="tanggal_selesai" class="block text-sm text-gray-600 mb-2">Tanggal Selesai <span class="text-red-500">*</span></label>
-                            <input type="date" name="tanggal_selesai" id="tanggal_selesai"
+                            <label for="end_datetime" class="block text-sm text-gray-600 mb-2">Tanggal & Jam Selesai <span class="text-red-500">*</span></label>
+                            <input type="datetime-local" name="end_datetime" id="end_datetime"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#000929] focus:border-transparent"
-                                min="{{ date('Y-m-d') }}" value="{{ old('tanggal_selesai') }}" required>
-                            @error('tanggal_selesai')
+                                min="{{ date('Y-m-d\TH:i') }}" value="{{ old('end_datetime') }}" required>
+                            @error('end_datetime')
                             <p class="text-red-600 text-sm mt-1.5 flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
                                     <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -184,15 +184,17 @@
 </div>
 
 <script>
-    document.getElementById('tanggal_mulai').addEventListener('change', function() {
-        const tanggalMulai = new Date(this.value);
-        tanggalMulai.setDate(tanggalMulai.getDate() + 1);
-        const nextDay = tanggalMulai.toISOString().split('T')[0];
-        document.getElementById('tanggal_selesai').min = nextDay;
+    document.getElementById('start_datetime').addEventListener('change', function() {
+        const startDateTime = new Date(this.value);
 
-        const tanggalSelesai = document.getElementById('tanggal_selesai');
-        if (tanggalSelesai.value && tanggalSelesai.value < nextDay) {
-            tanggalSelesai.value = '';
+        // Set minimum for end_datetime to be at least 1 hour after start
+        const minEndDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // Add 1 hour
+        document.getElementById('end_datetime').min = minEndDateTime.toISOString().slice(0, 16);
+
+        // Clear end_datetime if it's before the new minimum
+        const endDateTime = document.getElementById('end_datetime');
+        if (endDateTime.value && new Date(endDateTime.value) < minEndDateTime) {
+            endDateTime.value = '';
         }
     });
 </script>

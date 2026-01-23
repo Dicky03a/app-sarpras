@@ -16,6 +16,8 @@ class Borrowing extends Model
         'asset_id',
         'tanggal_mulai',
         'tanggal_selesai',
+        'start_datetime',
+        'end_datetime',
         'keperluan',
         'lampiran_bukti',
         'status',
@@ -24,8 +26,10 @@ class Borrowing extends Model
 
     protected $table = 'borrowings';
     protected $casts = [
-        'tanggal_mulai' => 'datetime',
-        'tanggal_selesai' => 'datetime',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -68,5 +72,46 @@ class Borrowing extends Model
     public function moves(): HasMany
     {
         return $this->hasMany(BorrowingMove::class, 'borrowing_id');
+    }
+
+    /**
+     * Check if the borrowing period has ended
+     */
+    public function isPeriodEnded(): bool
+    {
+        return now()->gt($this->end_datetime);
+    }
+
+    /**
+     * Check if the borrowing period has started
+     */
+    public function isPeriodStarted(): bool
+    {
+        return now()->gte($this->start_datetime);
+    }
+
+    /**
+     * Scope to get borrowings that have ended
+     */
+    public function scopeEnded($query)
+    {
+        return $query->where('end_datetime', '<', now());
+    }
+
+    /**
+     * Scope to get borrowings that are currently active
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('start_datetime', '<=', now())
+                     ->where('end_datetime', '>=', now());
+    }
+
+    /**
+     * Check if this borrowing conflicts with another time period
+     */
+    public function conflictsWith($start, $end): bool
+    {
+        return $this->start_datetime < $end && $this->end_datetime > $start;
     }
 }
