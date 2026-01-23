@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetCategory;
+use App\Rules\SecureFileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +13,7 @@ class AssetController extends Controller
 
     public function index()
     {
-        $assets = Asset::with('category')->get();
+        $assets = Asset::with('category')->paginate(20);
         return view('assets.index', compact('assets'));
     }
 
@@ -31,7 +32,7 @@ class AssetController extends Controller
             'kondisi' => 'required|in:baik,rusak ringan,rusak berat',
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,dipinjam,rusak',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => ['nullable', 'file', new SecureFileUpload(['jpeg', 'png', 'jpg', 'gif'], 2048)],
         ]);
 
         $data = $request->all();
@@ -69,7 +70,7 @@ class AssetController extends Controller
             'kondisi' => 'required|in:baik,rusak ringan,rusak berat',
             'deskripsi' => 'nullable|string',
             'status' => 'required|in:tersedia,dipinjam,rusak',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => ['nullable', 'file', new SecureFileUpload(['jpeg', 'png', 'jpg', 'gif'], 2048)],
         ]);
 
         $data = $request->all();
@@ -106,7 +107,8 @@ class AssetController extends Controller
 
     private function uploadPhoto($photo)
     {
-        $fileName = time() . '_' . $photo->getClientOriginalName();
-        return $photo->storeAs('assets', $fileName, 'public');
+        $extension = $photo->getClientOriginalExtension();
+        $sanitizedFileName = uniqid('asset_photo_' . auth()->id() . '_') . '.' . $extension;
+        return $photo->storeAs('assets', $sanitizedFileName, 'public');
     }
 }

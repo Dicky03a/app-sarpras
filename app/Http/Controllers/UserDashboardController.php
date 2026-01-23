@@ -24,7 +24,7 @@ class UserDashboardController extends Controller
         $borrowingRequests = $user->borrowings()
             ->with(['asset', 'rejection'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return view('user.requests', compact('borrowingRequests'));
     }

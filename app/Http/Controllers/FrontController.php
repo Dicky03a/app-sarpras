@@ -11,14 +11,14 @@ class FrontController extends Controller
     public function index()
     {
         // You can add logic for the home page here if needed
-        $assets = Asset::with('category')->get()->sortByDesc('created_at')->take(6); // Get the latest 6 assets
+        $assets = Asset::with('category')->latest()->limit(6)->get(); // Get the latest 6 assets
         $categories = AssetCategory::all();
         return view('frond.index', compact('assets', 'categories')); // or whatever home page view you want
     }
 
     public function category()
     {
-        $assets = Asset::with('category')->get();
+        $assets = Asset::with('category')->paginate(20);
         $categories = AssetCategory::all();
 
         return view('frond.category', compact('assets', 'categories'));
@@ -26,7 +26,7 @@ class FrontController extends Controller
 
     public function asset()
     {
-        $assets = Asset::all();
+        $assets = Asset::with('category')->paginate(20);
 
         return view('frond.asset', compact('assets'));
     }
@@ -51,7 +51,7 @@ class FrontController extends Controller
                     ->orWhere('kondisi', 'LIKE', "%{$query}%")
                     ->orWhere('status', 'LIKE', "%{$query}%")
                     ->with('category')
-                    ->get();
+                    ->paginate(20);
 
         $categories = AssetCategory::all();
 

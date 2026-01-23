@@ -174,3 +174,28 @@ erDiagram
         timestamp updated_at
     }
 ```
+
+## API Documentation
+
+This application includes API endpoints for various operations. Documentation is available in the following formats:
+
+- **Postman Collection**: Located at `storage/api/WebSarpras.postman_collection.json`
+- **Markdown Documentation**: Located at `docs/api-documentation.md`
+- **Swagger UI**: Accessible at `/api/documentation` when the application is running
+
+### Available API Endpoints
+
+- `GET /api/user` - Get authenticated user info
+- `POST /api/check-availability/{asset}` - Check asset availability for a date range
+
+### API Authentication
+
+The API uses Laravel Sanctum for authentication. Include your API token in the Authorization header:
+
+```
+Authorization: Bearer {your-token-here}
+```
+
+### Rate Limiting
+
+API endpoints are rate limited to 60 requests per minute per user/IP address.
